@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from 'react';
@@ -5,17 +6,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Mail, Lock, LogIn } from 'lucide-react';
+import { Loader2, Mail, Lock, LogIn, Github } from 'lucide-react';
 import Link from 'next/link';
-import { useAuth, useFirestore } from '@/firebase';
+import { useAuth } from '@/firebase';
 import { 
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
+  GithubAuthProvider,
+  signInWithPopup
 } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { Separator } from '@/components/ui/separator';
 
 export default function SignInPage() {
   const [loading, setLoading] = useState(false);
+  const [githubLoading, setGithubLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -50,6 +55,25 @@ export default function SignInPage() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGithubSignIn = async () => {
+    if (!auth) return;
+    setGithubLoading(true);
+    const provider = new GithubAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      toast({ title: "Welcome back!", description: "Successfully signed in with GitHub." });
+      router.push('/dashboard');
+    } catch (error: any) {
+      toast({ 
+        variant: "destructive", 
+        title: "GitHub Sign in failed", 
+        description: error.message || "Could not connect to GitHub." 
+      });
+    } finally {
+      setGithubLoading(false);
     }
   };
 
@@ -112,6 +136,27 @@ export default function SignInPage() {
                 {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Sign In"}
               </Button>
             </div>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <Separator />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-muted-foreground font-bold">Or continue with</span>
+            </div>
+          </div>
+
+          <div className="grid gap-4">
+            <Button 
+              variant="outline" 
+              onClick={handleGithubSignIn} 
+              disabled={githubLoading}
+              className="h-14 rounded-2xl border-muted-foreground/10 font-black gap-3 hover:bg-muted/50"
+            >
+              {githubLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Github className="w-5 h-5" />}
+              GitHub
+            </Button>
           </div>
 
           <p className="text-center text-sm text-muted-foreground">

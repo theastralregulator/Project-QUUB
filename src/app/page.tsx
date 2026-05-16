@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,7 +17,8 @@ import {
   Facebook,
   Instagram,
   Twitter,
-  Linkedin
+  Linkedin,
+  Github
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -173,11 +175,18 @@ export default function LandingPage() {
             <div className="bg-[#F9FAFB] p-10 rounded-[2.5rem] space-y-6 w-full lg:w-[350px]">
               <p className="text-xl font-bold text-[#111827]">Ready to get started?</p>
               <p className="text-sm text-[#6B7280] font-medium">Join Quub today and be a part of a growing community.</p>
-              <Link href="/auth/signup" className="block">
-                <Button className="w-full h-14 rounded-2xl font-bold text-lg bg-primary shadow-lg shadow-primary/20">
-                  Get Started Now <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
+              <div className="space-y-3">
+                <Link href="/auth/signup" className="block">
+                  <Button className="w-full h-14 rounded-2xl font-bold text-lg bg-primary shadow-lg shadow-primary/20">
+                    Get Started Now <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </Link>
+                <Link href="https://github.com/theastralregulator/Project-QUUB.git" target="_blank" className="block">
+                  <Button variant="outline" className="w-full h-14 rounded-2xl font-bold text-lg gap-2">
+                    <Github className="w-5 h-5" /> View Project Source
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -197,6 +206,9 @@ export default function LandingPage() {
                 <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Instagram className="w-4 h-4" /></Button>
                 <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Twitter className="w-4 h-4" /></Button>
                 <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Linkedin className="w-4 h-4" /></Button>
+                <Link href="https://github.com/theastralregulator/Project-QUUB.git" target="_blank">
+                  <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Github className="w-4 h-4" /></Button>
+                </Link>
               </div>
             </div>
             <div>

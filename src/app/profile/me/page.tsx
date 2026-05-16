@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from 'react';
@@ -17,7 +18,8 @@ import {
   PieChart,
   Atom,
   ChevronRight,
-  Loader2
+  Loader2,
+  Github
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -92,6 +94,19 @@ export default function ProfilePage() {
             <Button variant="outline" className="rounded-xl h-12 px-6 font-black text-sm border-muted-foreground/20 bg-white">
               Edit Profile
             </Button>
+            {profileData?.githubUrl || (user as any)?.reloadUserInfo?.screenName ? (
+              <Link href={profileData?.githubUrl || `https://github.com/${(user as any).reloadUserInfo.screenName}`} target="_blank">
+                <Button variant="outline" className="rounded-xl h-12 px-6 font-black text-sm border-muted-foreground/20 bg-white gap-2">
+                  <Github className="w-4 h-4" /> GitHub
+                </Button>
+              </Link>
+            ) : (
+              <Link href="https://github.com/theastralregulator/Project-QUUB.git" target="_blank">
+                <Button variant="outline" className="rounded-xl h-12 px-6 font-black text-sm border-muted-foreground/20 bg-white gap-2">
+                  <Github className="w-4 h-4" /> Connect Git
+                </Button>
+              </Link>
+            )}
             <Link href="/jobs/create">
               <Button className="bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-xl h-12 px-6 font-black text-sm shadow-xl shadow-primary/20">
                 <Plus className="w-4 h-4 mr-2" /> Post a Job

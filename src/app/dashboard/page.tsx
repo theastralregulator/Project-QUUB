@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { 
   Briefcase, 
-  Star, 
   MapPin, 
   User, 
   Plus, 
@@ -19,7 +18,6 @@ import {
   Lightbulb,
   Zap,
   LayoutDashboard,
-  Search,
   Bell,
   TrendingUp,
   Navigation,
@@ -28,7 +26,7 @@ import {
   ArrowUpRight,
   Loader2
 } from 'lucide-react';
-import { collection, query, limit, orderBy, where, doc, setDoc, serverTimestamp, getDocs } from 'firebase/firestore';
+import { collection, query, limit, orderBy, where, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useMemoFirebase } from '@/firebase/use-memo-firebase';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -49,14 +47,15 @@ export default function DashboardPage() {
   const db = useFirestore();
   const { toast } = useToast();
   
+  const [mounted, setMounted] = useState(false);
   const [greeting, setGreeting] = useState('');
-  const [location, setLocation] = useState<{ city: string; coords?: GeolocationCoordinates } | null>(null);
+  const [location, setLocation] = useState<{ city: string; coords?: any } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [recommendations, setRecommendations] = useState<RecommendationOutput | null>(null);
   const [isRecommending, setIsRecommending] = useState(false);
 
-  // Dynamic Greeting
   useEffect(() => {
+    setMounted(true);
     const hour = new Date().getHours();
     if (hour < 12) setGreeting('Good Morning');
     else if (hour < 17) setGreeting('Good Afternoon');
@@ -65,21 +64,20 @@ export default function DashboardPage() {
 
   // Geolocation
   const requestLocation = () => {
-    if (!navigator.geolocation) {
-      toast({ title: "Unsupported", description: "Geolocation is not supported by your browser." });
+    if (typeof window === 'undefined' || !navigator.geolocation) {
+      toast({ title: "Unsupported", description: "Geolocation is not supported." });
       return;
     }
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        // In a real app, we'd reverse geocode here. For now, we'll use a placeholder.
         setLocation({ city: "Kathmandu", coords: position.coords });
         setIsLocating(false);
         toast({ title: "Location Updated", description: "Showing jobs near Kathmandu." });
       },
       () => {
         setIsLocating(false);
-        toast({ variant: "destructive", title: "Location Error", description: "Could not access your location." });
+        toast({ variant: "destructive", title: "Location Error", description: "Could not access location." });
       }
     );
   };
@@ -104,7 +102,7 @@ export default function DashboardPage() {
 
   // AI Recommendations
   useEffect(() => {
-    if (user && !recommendations && !isRecommending) {
+    if (mounted && user && !recommendations && !isRecommending) {
       setIsRecommending(true);
       recommendRecommendations({
         userType: 'worker',
@@ -121,9 +119,8 @@ export default function DashboardPage() {
         setIsRecommending(false);
       }).catch(() => setIsRecommending(false));
     }
-  }, [user, location, recommendations, isRecommending]);
+  }, [mounted, user, location, recommendations, isRecommending]);
 
-  // Activity Chart Data (Mocked for UI)
   const activityData = [
     { day: 'Mon', apps: 4 },
     { day: 'Tue', apps: 7 },
@@ -140,6 +137,8 @@ export default function DashboardPage() {
       color: "hsl(var(--primary))",
     },
   } satisfies ChartConfig;
+
+  if (!mounted) return null;
 
   if (!user) {
     return (
@@ -188,10 +187,7 @@ export default function DashboardPage() {
       <div className="container mx-auto px-4 pt-8">
         <div className="grid lg:grid-cols-12 gap-8">
           
-          {/* Main Column */}
           <div className="lg:col-span-8 space-y-8">
-            
-            {/* Header / Dynamic Greeting */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="space-y-1">
                 <h1 className="text-4xl font-black tracking-tight">{greeting}, {user.displayName?.split(' ')[0] || 'Sabin'} 👋</h1>
@@ -209,7 +205,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Hero / CTA Card */}
             <Card className="border-none shadow-none rounded-[2.5rem] bg-gradient-to-br from-[#6366f1] to-[#a855f7] text-white overflow-hidden relative">
               <CardContent className="p-10 flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
                 <div className="space-y-6 text-left">
@@ -231,7 +226,6 @@ export default function DashboardPage() {
               <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
             </Card>
 
-            {/* Quick Actions Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { label: "Find Work", icon: Briefcase, color: "bg-purple-50 text-purple-600", href: "/jobs" },
@@ -252,7 +246,6 @@ export default function DashboardPage() {
               ))}
             </div>
 
-            {/* Nearby Opportunities Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -284,18 +277,10 @@ export default function DashboardPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3 w-full md:w-auto">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="rounded-xl shrink-0"
-                            onClick={() => handleSaveJob(job.id)}
-                          >
+                          <Button variant="ghost" size="icon" className="rounded-xl shrink-0" onClick={() => handleSaveJob(job.id)}>
                             <Bookmark className="w-5 h-5" />
                           </Button>
-                          <Button 
-                            onClick={() => handleQuickApply(job.id)}
-                            className="flex-1 md:flex-none bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-xl h-11 px-8 font-black text-xs shadow-lg shadow-primary/10"
-                          >
+                          <Button onClick={() => handleQuickApply(job.id)} className="flex-1 md:flex-none bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-xl h-11 px-8 font-black text-xs shadow-lg shadow-primary/10">
                             Quick Apply
                           </Button>
                         </div>
@@ -316,7 +301,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* AI Recommended Section */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Flame className="w-5 h-5 text-orange-500" />
@@ -347,13 +331,9 @@ export default function DashboardPage() {
                 ))}
               </div>
             </div>
-
           </div>
 
-          {/* Sidebar Area */}
           <div className="lg:col-span-4 space-y-8">
-            
-            {/* Overview Stats */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-black tracking-tight">Overview</h3>
@@ -381,7 +361,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Activity Chart */}
             <Card className="border-none shadow-sm rounded-[2.5rem] bg-white overflow-hidden">
               <CardHeader className="p-8 pb-0">
                 <CardTitle className="text-lg font-black tracking-tight">Weekly Activity</CardTitle>
@@ -390,30 +369,18 @@ export default function DashboardPage() {
               <CardContent className="p-8 pt-6 h-[220px]">
                 <ChartContainer config={chartConfig} className="h-full w-full">
                   <BarChart data={activityData}>
-                    <Bar 
-                      dataKey="apps" 
-                      radius={[6, 6, 0, 0]}
-                    >
+                    <Bar dataKey="apps" radius={[6, 6, 0, 0]}>
                       {activityData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={index === 3 ? 'var(--color-apps)' : '#E0E7FF'} />
                       ))}
                     </Bar>
-                    <XAxis 
-                      dataKey="day" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} 
-                    />
-                    <ChartTooltip 
-                      cursor={{ fill: 'transparent' }}
-                      content={<ChartTooltipContent hideLabel />}
-                    />
+                    <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} />
+                    <ChartTooltip cursor={{ fill: 'transparent' }} content={<ChartTooltipContent hideLabel />} />
                   </BarChart>
                 </ChartContainer>
               </CardContent>
             </Card>
 
-            {/* Recently Viewed Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-black tracking-tight">Recently Viewed</h3>
               <div className="space-y-3">
@@ -434,7 +401,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Tip of the Day */}
             <Card className="border-none shadow-none rounded-[2.5rem] bg-gradient-to-br from-[#E6E9FF] to-[#F0F2FF] overflow-hidden">
               <CardContent className="p-8 space-y-6">
                 <div className="flex items-center gap-4">
@@ -457,7 +423,6 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
-
           </div>
         </div>
       </div>

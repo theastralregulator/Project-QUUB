@@ -1,0 +1,57 @@
+
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Information about a Quub user (Worker, Employer, or both).",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "bio": { "type": "string" },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "userType": { "type": "string", "enum": ["worker", "employer", "both"] },
+        "location": { "type": "string" },
+        "avatarUrl": { "type": "string" },
+        "rating": { "type": "number" },
+        "reviewsCount": { "type": "number" },
+        "availabilityStatus": { "type": "string", "enum": ["available", "busy"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "userType"]
+    },
+    "Job": {
+      "title": "Job",
+      "description": "A work opportunity posted by an employer.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "budget": { "type": "string" },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "deadline": { "type": "string" },
+        "postedBy": { "type": "string" },
+        "employerName": { "type": "string" },
+        "location": { "type": "string" },
+        "type": { "type": "string", "enum": ["remote", "onsite", "hybrid"] },
+        "isUrgent": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "budget", "postedBy"]
+    }
+  },
+  "auth": {
+    "providers": ["email", "google"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Storage for user profile data."
+    },
+    "/jobs/{jobId}": {
+      "schema": "Job",
+      "description": "Storage for job postings."
+    }
+  }
+}

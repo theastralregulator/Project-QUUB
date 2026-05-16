@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from 'react';
@@ -6,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Mail, Lock, User, Phone } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Phone, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { 
@@ -16,9 +15,11 @@ import {
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     fname: '',
     lname: '',
@@ -34,6 +35,7 @@ export default function SignUpPage() {
 
   const handleSignUp = async () => {
     if (!auth || !db) return;
+    setAuthError(null);
     
     if (!formData.email || !formData.password || !formData.fname) {
       toast({
@@ -57,7 +59,7 @@ export default function SignUpPage() {
         displayName: fullName
       });
 
-      // 3. Save User Profile to Firestore (Non-blocking as per guidelines)
+      // 3. Save User Profile to Firestore
       const userProfileData = {
         name: fullName,
         email: formData.email,
@@ -91,11 +93,17 @@ export default function SignUpPage() {
 
       router.push('/dashboard');
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Sign up failed",
-        description: error.message || "An unexpected error occurred during sign up."
-      });
+      console.error("Sign up error:", error);
+      
+      if (error.code === 'auth/configuration-not-found') {
+        setAuthError("Email/Password provider is not enabled in your Firebase Console. Please go to Authentication > Sign-in method and enable it.");
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Sign up failed",
+          description: error.message || "An unexpected error occurred during sign up."
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -114,6 +122,16 @@ export default function SignUpPage() {
         </CardHeader>
 
         <CardContent className="p-10 pt-8 space-y-8">
+          {authError && (
+            <Alert variant="destructive" className="rounded-2xl border-destructive/50">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Configuration Required</AlertTitle>
+              <AlertDescription>
+                {authError}
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="space-y-5">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">

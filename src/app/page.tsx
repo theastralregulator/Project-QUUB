@@ -17,7 +17,8 @@ import {
   Facebook,
   Instagram,
   Twitter,
-  Linkedin
+  Linkedin,
+  Github
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -100,7 +101,7 @@ export default function LandingPage() {
                     Get Started <ArrowRight className="w-5 h-5" />
                   </Button>
                 </Link>
-                <Link href="/work" className="w-full sm:w-auto">
+                <Link href="/jobs" className="w-full sm:w-auto">
                   <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 h-14 rounded-2xl font-bold border-2 hover:bg-muted/50">
                     Explore Quub
                   </Button>
@@ -225,14 +226,15 @@ export default function LandingPage() {
                 <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Instagram className="w-4 h-4" /></Button>
                 <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Twitter className="w-4 h-4" /></Button>
                 <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Linkedin className="w-4 h-4" /></Button>
+                <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Github className="w-4 h-4" /></Button>
               </div>
             </div>
             <div>
               <h4 className="font-bold text-[#111827] mb-6">Platform</h4>
               <ul className="space-y-4 text-sm font-medium text-[#6B7280]">
                 <li><Link href="#" className="hover:text-primary transition-colors">How It Works</Link></li>
-                <li><Link href="/work" className="hover:text-primary transition-colors">Browse Jobs</Link></li>
-                <li><Link href="/workers" className="hover:text-primary transition-colors">Browse Workers</Link></li>
+                <li><Link href="/jobs" className="hover:text-primary transition-colors">Browse Jobs</Link></li>
+                <li><Link href="/jobs?tab=workers" className="hover:text-primary transition-colors">Browse Workers</Link></li>
                 <li><Link href="#" className="hover:text-primary transition-colors">Pricing</Link></li>
               </ul>
             </div>

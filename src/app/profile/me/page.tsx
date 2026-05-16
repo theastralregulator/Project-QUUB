@@ -17,7 +17,8 @@ import {
   Star,
   PieChart,
   Atom,
-  ChevronRight
+  ChevronRight,
+  Github
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -104,8 +105,13 @@ export default function ProfilePage() {
             <div className="space-y-3 mb-8">
               <h2 className="text-4xl font-black tracking-tight text-[#111827]">{user?.displayName || "Aman Sharma"}</h2>
               <p className="text-lg font-bold text-[#6B7280]">Full Stack Developer</p>
-              <div className="inline-block">
+              <div className="flex items-center justify-center gap-3">
                 <Badge variant="secondary" className="bg-[#EBEFFF] text-[#6366f1] font-black px-5 py-1.5 rounded-full text-[10px] uppercase tracking-widest border-none">Premium Member</Badge>
+                <Link href="https://github.com" target="_blank">
+                  <Button variant="outline" size="sm" className="rounded-full h-8 px-4 gap-2 border-muted-foreground/10 bg-white text-xs font-black uppercase tracking-widest hover:bg-muted/5">
+                    <Github className="w-3.5 h-3.5" /> GitHub
+                  </Button>
+                </Link>
               </div>
             </div>
 

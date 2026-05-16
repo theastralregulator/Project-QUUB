@@ -1,211 +1,242 @@
+"use client"
+
+import { useUser } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MapPin, Calendar, Star, Edit3, Link as LinkIcon, Github, Twitter, Award, CheckCircle2 } from 'lucide-react';
+import { 
+  Plus, 
+  CheckCircle2, 
+  Calendar, 
+  TrendingUp, 
+  Briefcase, 
+  Wallet, 
+  Star,
+  PieChart,
+  Atom,
+  ChevronRight,
+  LayoutDashboard
+} from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
-export default function MyProfilePage() {
-  const skills = ["React", "TypeScript", "Tailwind CSS", "Firebase", "UI/UX Design", "Figma", "Node.js"];
+export default function ProfilePage() {
+  const { user } = useUser();
   
+  const stats = [
+    { label: "Member Since", value: "June 2023", icon: Calendar, color: "text-purple-600 bg-purple-50" },
+    { label: "Job Success Rate", value: "98%", icon: TrendingUp, color: "text-green-600 bg-green-50" },
+    { label: "Total Earned", value: "NPR 1,250,000+", icon: Wallet, color: "text-indigo-600 bg-indigo-50" },
+    { label: "Jobs Completed", value: "115", icon: CheckCircle2, color: "text-emerald-600 bg-emerald-50" },
+    { label: "Active Projects", value: "2", icon: Briefcase, color: "text-violet-600 bg-violet-50" },
+  ];
+
+  const projects = [
+    {
+      title: "Website Redesign",
+      desc: "We need a platform and website redesign for your business.",
+      image: "https://picsum.photos/seed/project1/600/400",
+      color: "bg-indigo-600"
+    },
+    {
+      title: "Mobile App Development",
+      desc: "Develop Development mobile app for Android and iOS.",
+      image: "https://picsum.photos/seed/project2/600/400",
+      color: "bg-emerald-500"
+    }
+  ];
+
+  const reviews = [
+    { name: "Aakash R.", time: "5 date ago", rating: 5, text: "Great realize your experience with marti and developer in making a bushing project is wellout." },
+    { name: "Aakash R.", time: "5 date ago", rating: 5, text: "Great to have 4+ years of experience in UI/UX design. I have worked a similar projects before." },
+    { name: "Aakash R.", time: "2 date ago", rating: 5, text: "Great to hear that. Can your time so xrm and great I visibility from your reviews!" }
+  ];
+
+  const skills = ["React", "Node.js", "JavaScript", "MongoDB", "UI/UX Design", "Mobile Design", "UI/UX Design", "Frotnet & Analytics"];
+
   return (
-    <div className="min-h-screen bg-muted/20 pb-20">
-      {/* Cover Header */}
-      <div className="h-48 md:h-64 w-full bg-gradient-to-r from-primary to-accent relative">
-        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/20 to-transparent" />
-      </div>
+    <div className="min-h-screen bg-[#F8F9FE] pb-24 lg:pb-12 pt-8">
+      <div className="container mx-auto px-4 max-w-7xl">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div className="space-y-1 text-left">
+            <h1 className="text-4xl font-black tracking-tight">My Profile</h1>
+            <p className="text-muted-foreground font-medium">Connect, chat and get things done.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" className="rounded-xl h-12 px-6 font-black text-sm border-muted-foreground/20 bg-white">
+              Edit Profile
+            </Button>
+            <Button className="bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-xl h-12 px-6 font-black text-sm shadow-xl shadow-primary/20">
+              <Plus className="w-4 h-4 mr-2" /> Post a Job
+            </Button>
+          </div>
+        </div>
 
-      <div className="container mx-auto px-4 -mt-20 relative z-10">
-        <div className="grid lg:grid-cols-12 gap-8">
-          {/* Left Column - User Info */}
-          <div className="lg:col-span-4 space-y-6">
-            <Card className="rounded-3xl border-none shadow-xl overflow-hidden bg-white">
-              <CardContent className="p-8 text-center space-y-6">
-                <div className="relative inline-block mx-auto">
-                  <Avatar className="w-32 h-32 rounded-3xl border-4 border-white shadow-2xl">
-                    <AvatarImage src="https://picsum.photos/seed/me/400" />
-                    <AvatarFallback>ME</AvatarFallback>
-                  </Avatar>
-                  <div className="absolute -bottom-2 -right-2 bg-primary text-white rounded-full p-2 shadow-lg">
-                    <CheckCircle2 className="w-6 h-6" />
-                  </div>
-                </div>
+        {/* Hero Card */}
+        <Card className="border-none shadow-none rounded-[3rem] bg-gradient-to-br from-[#E6E9FF] to-[#F0F2FF] mb-12 overflow-hidden relative">
+          <CardContent className="p-10 md:p-16 flex flex-col items-center text-center relative z-10">
+            {/* Background Decorative Icons */}
+            <div className="absolute top-10 left-1/4 -translate-x-1/2 opacity-20 hidden lg:block">
+              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg transform -rotate-12">
+                <Briefcase className="w-8 h-8 text-indigo-600" />
+              </div>
+            </div>
+            <div className="absolute top-20 right-1/4 translate-x-1/2 opacity-20 hidden lg:block">
+              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg transform rotate-12">
+                <Star className="w-8 h-8 text-yellow-500 fill-yellow-500" />
+              </div>
+            </div>
+            <div className="absolute bottom-20 left-1/3 -translate-x-full opacity-20 hidden lg:block">
+              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg transform rotate-6">
+                <Atom className="w-8 h-8 text-emerald-500" />
+              </div>
+            </div>
+            <div className="absolute top-1/2 right-10 -translate-y-1/2 opacity-20 hidden lg:block">
+              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg transform -rotate-6">
+                <PieChart className="w-8 h-8 text-purple-500" />
+              </div>
+            </div>
+             <div className="absolute bottom-10 right-1/4 translate-x-1/2 opacity-20 hidden lg:block">
+              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg transform rotate-12">
+                <TrendingUp className="w-8 h-8 text-blue-500" />
+              </div>
+            </div>
 
-                <div className="space-y-1">
-                  <h1 className="text-2xl font-bold">Jordan Carter</h1>
-                  <p className="text-primary font-semibold">Senior Product Designer</p>
-                </div>
+            {/* Profile Info */}
+            <div className="relative mb-6">
+              <Avatar className="w-32 h-32 rounded-full border-8 border-white shadow-2xl">
+                <AvatarImage src={user?.photoURL || `https://picsum.photos/seed/${user?.uid || 'aman'}/400`} />
+                <AvatarFallback className="text-3xl font-black">{user?.displayName?.[0] || 'A'}</AvatarFallback>
+              </Avatar>
+            </div>
+            
+            <div className="space-y-3 mb-8">
+              <h2 className="text-4xl font-black tracking-tight text-[#111827]">{user?.displayName || "Aman Sharma"}</h2>
+              <p className="text-lg font-bold text-[#6B7280]">Full Stack Developer</p>
+              <div className="inline-block">
+                <Badge variant="secondary" className="bg-[#EBEFFF] text-[#6366f1] font-black px-5 py-1.5 rounded-full text-[10px] uppercase tracking-widest border-none">
+                  Premium Member
+                </Badge>
+              </div>
+            </div>
 
-                <div className="flex items-center justify-center gap-6 text-sm">
-                  <div className="text-center">
-                    <div className="font-bold">4.9</div>
-                    <div className="text-muted-foreground text-[10px] uppercase font-bold tracking-tighter">Rating</div>
-                  </div>
-                  <div className="w-px h-8 bg-muted" />
-                  <div className="text-center">
-                    <div className="font-bold">142</div>
-                    <div className="text-muted-foreground text-[10px] uppercase font-bold tracking-tighter">Jobs</div>
-                  </div>
-                  <div className="w-px h-8 bg-muted" />
-                  <div className="text-center">
-                    <div className="font-bold">$12k</div>
-                    <div className="text-muted-foreground text-[10px] uppercase font-bold tracking-tighter">Earned</div>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <Button className="w-full rounded-2xl h-12 font-bold gap-2">
-                    <Edit3 className="w-4 h-4" />
-                    Edit Profile
-                  </Button>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="icon" className="flex-1 h-12 rounded-2xl"><Github className="w-5 h-5" /></Button>
-                    <Button variant="outline" size="icon" className="flex-1 h-12 rounded-2xl"><Twitter className="w-5 h-5" /></Button>
-                    <Button variant="outline" size="icon" className="flex-1 h-12 rounded-2xl"><LinkIcon className="w-5 h-5" /></Button>
-                  </div>
-                </div>
-
-                <div className="pt-6 border-t space-y-4 text-left">
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <MapPin className="w-4 h-4 text-primary" />
-                    San Francisco, CA
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4 text-primary" />
-                    Joined Jan 2022
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <Award className="w-4 h-4 text-primary" />
-                    Top Rated Plus
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-3xl border-none shadow-sm bg-white p-6">
-              <h3 className="font-bold mb-4">Verification</h3>
-              <div className="space-y-3">
-                {[
-                  { label: "ID Verified", status: true },
-                  { label: "Phone Verified", status: true },
-                  { label: "Email Verified", status: true },
-                  { label: "Payment Verified", status: false },
-                ].map((v, i) => (
-                  <div key={i} className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">{v.label}</span>
-                    {v.status ? (
-                      <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    ) : (
-                      <span className="text-[10px] font-bold text-primary uppercase">Pending</span>
-                    )}
-                  </div>
+            {/* Verified Skills */}
+            <div className="space-y-4 max-w-2xl">
+              <div className="flex items-center justify-center gap-2">
+                <span className="font-black text-[10px] uppercase tracking-[0.2em] text-[#6B7280]">Verified Skills</span>
+                <CheckCircle2 className="w-4 h-4 text-[#6366f1]" />
+              </div>
+              <div className="flex flex-wrap justify-center gap-2">
+                {skills.map((skill, i) => (
+                  <Badge 
+                    key={i} 
+                    variant="secondary" 
+                    className="bg-white border-none text-[#111827] font-black px-5 py-2.5 rounded-xl text-[11px] gap-2 shadow-sm"
+                  >
+                    {skill}
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#6366f1] fill-[#6366f1]/10" />
+                  </Badge>
                 ))}
               </div>
-            </Card>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bottom Sections Grid */}
+        <div className="grid lg:grid-cols-3 gap-10 text-left">
+          {/* Overview & Stats */}
+          <div className="space-y-6">
+            <h3 className="text-2xl font-black tracking-tight text-[#111827]">Overview & Stats</h3>
+            <div className="space-y-4">
+              {stats.map((stat, i) => (
+                <Card key={i} className="border-none shadow-sm rounded-[2rem] bg-white hover:scale-[1.02] transition-all">
+                  <CardContent className="p-6 flex items-center gap-4">
+                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm", stat.color)}>
+                      <stat.icon className="w-6 h-6" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">{stat.label}</p>
+                      <p className="text-xl font-black text-[#111827]">{stat.value}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
 
-          {/* Right Column - Tabs & Content */}
-          <div className="lg:col-span-8 space-y-8">
-            <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="bg-white p-1 rounded-2xl shadow-sm w-full md:w-auto h-14 flex items-center justify-start overflow-x-auto no-scrollbar">
-                <TabsTrigger value="overview" className="rounded-xl h-12 px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-white">Overview</TabsTrigger>
-                <TabsTrigger value="portfolio" className="rounded-xl h-12 px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-white">Portfolio</TabsTrigger>
-                <TabsTrigger value="reviews" className="rounded-xl h-12 px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-white">Reviews</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="overview" className="space-y-8">
-                <Card className="rounded-3xl border-none shadow-sm p-8 bg-white space-y-6">
-                  <div className="space-y-4">
-                    <h2 className="text-2xl font-headline">About Me</h2>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Passionate Senior Product Designer with over 8 years of experience building high-conversion interfaces for Fortune 500 companies and Silicon Valley startups. My approach blends data-driven strategy with world-class aesthetics. I specialize in React-based design systems and mobile-first experiences.
-                    </p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <h2 className="text-2xl font-headline">Skills & Expertise</h2>
-                    <div className="flex flex-wrap gap-2">
-                      {skills.map(skill => (
-                        <Badge key={skill} variant="secondary" className="bg-primary/5 text-primary border-primary/10 px-4 py-2 rounded-xl font-medium">
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </Card>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <Card className="rounded-3xl border-none shadow-sm p-8 bg-white space-y-4">
-                    <h3 className="font-bold text-xl">Employment History</h3>
-                    <div className="space-y-6">
-                      {[1, 2].map(i => (
-                        <div key={i} className="space-y-1 relative pl-4 border-l-2 border-primary/20">
-                          <div className="absolute top-0 -left-[5px] w-2 h-2 rounded-full bg-primary" />
-                          <div className="text-xs font-bold text-primary uppercase">2020 — Present</div>
-                          <h4 className="font-bold">Senior Designer at Uber</h4>
-                          <p className="text-sm text-muted-foreground">Led the redesign of the driver onboarding flow, resulting in a 22% increase in activation.</p>
-                        </div>
-                      ))}
-                    </div>
-                  </Card>
-                  <Card className="rounded-3xl border-none shadow-sm p-8 bg-white space-y-4">
-                    <h3 className="font-bold text-xl">Education</h3>
-                    <div className="space-y-6">
-                      <div className="space-y-1 relative pl-4 border-l-2 border-accent/20">
-                        <div className="absolute top-0 -left-[5px] w-2 h-2 rounded-full bg-accent" />
-                        <div className="text-xs font-bold text-accent uppercase">2014 — 2018</div>
-                        <h4 className="font-bold">BFA in Graphic Design</h4>
-                        <p className="text-sm text-muted-foreground">Rhode Island School of Design (RISD)</p>
+          {/* Portfolio Highlights */}
+          <div className="space-y-6">
+            <h3 className="text-2xl font-black tracking-tight text-[#111827]">Portfolio Highlights</h3>
+            <div className="space-y-4">
+              <p className="font-black text-[10px] text-[#9CA3AF] uppercase tracking-[0.2em] px-1">Featured Projects</p>
+              {projects.map((project, i) => (
+                <Card key={i} className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden group">
+                  <div className={cn("aspect-video relative overflow-hidden", project.color)}>
+                    <Image 
+                      src={project.image} 
+                      alt={project.title} 
+                      fill 
+                      className="object-cover opacity-95 group-hover:scale-110 transition-transform duration-700" 
+                      data-ai-hint="project showcase"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent flex items-end p-6">
+                      <div className="bg-white/95 backdrop-blur-md rounded-xl px-4 py-2 text-[10px] font-black uppercase text-indigo-600 shadow-lg">
+                        {project.title}
                       </div>
                     </div>
-                  </Card>
-                </div>
-              </TabsContent>
+                  </div>
+                  <CardContent className="p-8 space-y-4">
+                    <h4 className="text-2xl font-black text-[#111827]">{project.title}</h4>
+                    <p className="text-sm text-[#6B7280] font-medium leading-relaxed">
+                      {project.desc}
+                    </p>
+                    <Link href="#" className="inline-flex items-center gap-2 text-[#6366f1] text-sm font-black group/link">
+                      View Link <ChevronRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
 
-              <TabsContent value="portfolio" className="grid md:grid-cols-2 gap-6">
-                {[1, 2, 3, 4].map(i => (
-                  <Card key={i} className="group overflow-hidden rounded-3xl border-none shadow-sm hover:shadow-xl transition-all bg-white">
-                    <div className="relative aspect-video">
-                      <Image 
-                        src={`https://picsum.photos/seed/port${i}/600/400`} 
-                        alt="Project" 
-                        fill 
-                        className="object-cover group-hover:scale-105 transition-transform duration-500" 
-                      />
-                    </div>
-                    <CardContent className="p-6">
-                      <h4 className="font-bold text-lg">Fintech Mobile App Redesign</h4>
-                      <p className="text-sm text-muted-foreground">Comprehensive UI kit and case study for a banking application.</p>
+          {/* Recent Reviews */}
+          <div className="space-y-6">
+            <h3 className="text-2xl font-black tracking-tight text-[#111827]">Recent Reviews</h3>
+            <div className="space-y-4">
+              <p className="font-black text-[10px] text-[#9CA3AF] uppercase tracking-[0.2em] px-1">Recent Clients</p>
+              <div className="space-y-4">
+                {reviews.map((review, i) => (
+                  <Card key={i} className="border-none shadow-sm rounded-[2rem] bg-white">
+                    <CardContent className="p-8 space-y-5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <Avatar className="w-12 h-12 rounded-2xl shadow-sm border border-muted/20">
+                            <AvatarImage src={`https://picsum.photos/seed/rev-${i}/100`} />
+                            <AvatarFallback className="font-black text-xs">{review.name[0]}</AvatarFallback>
+                          </Avatar>
+                          <div className="text-left space-y-0.5">
+                            <p className="font-black text-base text-[#111827]">{review.name}</p>
+                            <div className="flex gap-0.5">
+                              {[1, 2, 3, 4, 5].map(s => <Star key={s} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />)}
+                            </div>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest">{review.time}</span>
+                      </div>
+                      <p className="text-sm text-[#6B7280] font-medium leading-relaxed">
+                        "{review.text}"
+                      </p>
                     </CardContent>
                   </Card>
                 ))}
-              </TabsContent>
-
-              <TabsContent value="reviews" className="space-y-4">
-                {[1, 2, 3].map(i => (
-                  <Card key={i} className="rounded-3xl border-none shadow-sm p-6 bg-white flex gap-4">
-                    <Avatar className="w-12 h-12 rounded-xl">
-                      <AvatarImage src={`https://picsum.photos/seed/rev${i}/100`} />
-                      <AvatarFallback>U</AvatarFallback>
-                    </Avatar>
-                    <div className="space-y-2 flex-1">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-bold">Sarah Williams</h4>
-                          <p className="text-xs text-muted-foreground">Founder, TechStack</p>
-                        </div>
-                        <div className="flex gap-0.5">
-                          {[1,2,3,4,5].map(s => <Star key={s} className="w-3 h-3 fill-yellow-400 text-yellow-400" />)}
-                        </div>
-                      </div>
-                      <p className="text-sm">"Incredible eye for detail and very responsive. Jordan took our vague ideas and turned them into a world-class product. Highly recommend!"</p>
-                      <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">Apr 12, 2024</div>
-                    </div>
-                  </Card>
-                ))}
-              </TabsContent>
-            </Tabs>
+              </div>
+              <Button variant="outline" className="w-full rounded-[1.25rem] h-16 font-black border-muted/50 text-[#6B7280] hover:text-[#6366f1] hover:bg-white bg-white shadow-sm transition-all">
+                View All Reviews
+              </Button>
+            </div>
           </div>
         </div>
       </div>

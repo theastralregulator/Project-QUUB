@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Mail, Lock, User } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth, useFirestore } from '@/firebase';
 import { 
@@ -23,6 +23,7 @@ export default function SignUpPage() {
     fname: '',
     lname: '',
     email: '',
+    phone: '',
     password: '',
   });
 
@@ -32,7 +33,7 @@ export default function SignUpPage() {
   const { toast } = useToast();
 
   const handleSignUp = async () => {
-    if (!auth || !db || !formData.email || !formData.password) return;
+    if (!auth || !db || !formData.email || !formData.password || !formData.fname) return;
     setLoading(true);
 
     try {
@@ -50,6 +51,7 @@ export default function SignUpPage() {
       setDoc(doc(db, 'users', user.uid), {
         name: fullName,
         email: formData.email,
+        phone: formData.phone,
         userType: 'both',
         skills: [],
         bio: '',
@@ -129,6 +131,21 @@ export default function SignUpPage() {
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
                   placeholder="jane@example.com" 
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-xs font-black uppercase tracking-widest ml-1">Phone Number</Label>
+              <div className="relative">
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input 
+                  id="phone" 
+                  type="tel" 
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
+                  placeholder="+1 (555) 000-0000" 
                 />
               </div>
             </div>

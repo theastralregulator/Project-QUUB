@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Mail, Lock, LogIn } from 'lucide-react';
+import { Loader2, Mail, Lock, LogIn, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/firebase';
 import { 
@@ -19,6 +19,7 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
+    phone: '',
     password: '',
   });
 
@@ -71,6 +72,22 @@ export default function SignInPage() {
                 />
               </div>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-xs font-black uppercase tracking-widest ml-1">Phone Number (Optional)</Label>
+              <div className="relative">
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input 
+                  id="phone" 
+                  type="tel" 
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
+                  placeholder="+1 (555) 000-0000" 
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
               <div className="flex justify-between items-center pr-1">
                 <Label htmlFor="pass" className="text-xs font-black uppercase tracking-widest ml-1">Password</Label>

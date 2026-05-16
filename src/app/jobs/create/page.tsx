@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Briefcase, DollarSign, MapPin, Sparkles, Plus } from 'lucide-react';
+import { Loader2, Briefcase, DollarSign, MapPin, Sparkles, Plus, Tag } from 'lucide-react';
 import { generateJobDescription } from '@/ai/flows/generate-job-description-flow';
 
 export default function CreateJobPage() {
@@ -29,8 +29,11 @@ export default function CreateJobPage() {
     budget: '',
     location: 'Remote',
     type: 'remote',
+    category: 'Development',
     skills: ''
   });
+
+  const categories = ["Design", "Development", "Writing", "Marketing", "Admin", "Data"];
 
   const handleAICompose = async () => {
     if (!formData.title) {
@@ -66,6 +69,7 @@ export default function CreateJobPage() {
       budget: formData.budget,
       location: formData.location,
       type: formData.type,
+      category: formData.category,
       skills: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
       postedBy: user.uid,
       employerName: user.displayName || 'Anonymous',
@@ -73,8 +77,11 @@ export default function CreateJobPage() {
       isUrgent: false
     };
 
-    // Non-blocking mutation for better UX
     addDoc(collection(db, 'jobs'), jobData)
+      .then(() => {
+        toast({ title: "Job Posted!", description: "Your opportunity is now live." });
+        router.push('/jobs');
+      })
       .catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
           path: 'jobs',
@@ -84,10 +91,6 @@ export default function CreateJobPage() {
         errorEmitter.emit('permission-error', permissionError);
         setLoading(false);
       });
-
-    // Optimistic UI response
-    toast({ title: "Job Posted!", description: "Your opportunity is now live." });
-    router.push('/dashboard');
   };
 
   if (!user) return null;
@@ -142,6 +145,39 @@ export default function CreateJobPage() {
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
+                  <Label className="text-xs font-black uppercase tracking-widest ml-1">Category</Label>
+                  <div className="relative">
+                    <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
+                    <Select onValueChange={v => setFormData({...formData, category: v})} defaultValue={formData.category}>
+                      <SelectTrigger className="h-14 rounded-2xl bg-muted/30 border-none pl-12">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map(cat => (
+                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs font-black uppercase tracking-widest ml-1">Work Type</Label>
+                  <Select onValueChange={v => setFormData({...formData, type: v})} defaultValue={formData.type}>
+                    <SelectTrigger className="h-14 rounded-2xl bg-muted/30 border-none">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="remote">Remote</SelectItem>
+                      <SelectItem value="onsite">On-site</SelectItem>
+                      <SelectItem value="hybrid">Hybrid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-2">
                   <Label className="text-xs font-black uppercase tracking-widest ml-1">Budget / Rate</Label>
                   <div className="relative">
                     <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -168,30 +204,14 @@ export default function CreateJobPage() {
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-xs font-black uppercase tracking-widest ml-1">Employment Type</Label>
-                  <Select onValueChange={v => setFormData({...formData, type: v})} defaultValue={formData.type}>
-                    <SelectTrigger className="h-14 rounded-2xl bg-muted/30 border-none">
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="remote">Remote</SelectItem>
-                      <SelectItem value="onsite">On-site</SelectItem>
-                      <SelectItem value="hybrid">Hybrid</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-xs font-black uppercase tracking-widest ml-1">Skills (comma separated)</Label>
-                  <Input 
-                    value={formData.skills}
-                    onChange={e => setFormData({ ...formData, skills: e.target.value })}
-                    className="h-14 rounded-2xl bg-muted/30 border-none px-5" 
-                    placeholder="React, Design, Node.js"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-black uppercase tracking-widest ml-1">Skills (comma separated)</Label>
+                <Input 
+                  value={formData.skills}
+                  onChange={e => setFormData({ ...formData, skills: e.target.value })}
+                  className="h-14 rounded-2xl bg-muted/30 border-none px-5" 
+                  placeholder="React, Design, Node.js"
+                />
               </div>
 
               <Button 

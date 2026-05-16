@@ -51,8 +51,7 @@ export default function JobsPage() {
   // Queries for Works (Jobs)
   const jobsQuery = useMemoFirebase(() => {
     if (!db) return null;
-    let baseQuery = collection(db, 'jobs');
-    return query(baseQuery, orderBy('createdAt', 'desc'), limit(30));
+    return query(collection(db, 'jobs'), orderBy('createdAt', 'desc'), limit(50));
   }, [db]);
 
   // Queries for Workers (Users with worker role)
@@ -69,7 +68,11 @@ export default function JobsPage() {
     return rawJobs.filter(job => {
       const matchesSearch = job.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            job.description?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === 'All' || job.type?.toLowerCase() === selectedCategory.toLowerCase();
+      
+      const matchesCategory = selectedCategory === 'All' || 
+                             job.category?.toLowerCase() === selectedCategory.toLowerCase() ||
+                             (selectedCategory === 'Remote' && job.type === 'remote');
+      
       return matchesSearch && matchesCategory;
     });
   }, [rawJobs, searchQuery, selectedCategory]);
@@ -113,10 +116,6 @@ export default function JobsPage() {
     } catch (e) {
       toast({ variant: "destructive", title: "Error", description: "Failed to submit application." });
     }
-  };
-
-  const handleHire = (workerId: string) => {
-    router.push(`/messages?hire=${workerId}`);
   };
 
   if (!mounted) return null;
@@ -187,12 +186,12 @@ export default function JobsPage() {
               <h3 className="text-2xl font-black tracking-tight">Active Jobs <span className="text-muted-foreground font-medium ml-2 text-lg">({filteredJobs.length})</span></h3>
             </div>
             <div className="grid gap-6">
-              {jobsLoading ? [1, 2, 3].map(i => <div key={i} className="h-44 bg-white rounded-[2.5rem] animate-pulse" />) : filteredJobs.map((job) => (
+              {jobsLoading ? [1, 2, 3].map(i => <div key={i} className="h-44 bg-white rounded-[2.5rem] animate-pulse" />) : filteredJobs.length ? filteredJobs.map((job) => (
                 <Card key={job.id} className="border-none shadow-sm rounded-[2.5rem] bg-white group hover:shadow-xl transition-all overflow-hidden border-l-8 border-l-transparent hover:border-l-primary">
                   <CardContent className="p-8 md:p-10">
                     <div className="flex flex-col md:flex-row gap-10">
                       <div className="w-24 h-24 bg-indigo-50 text-[#6366f1] rounded-[2rem] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
-                        {job.title?.toLowerCase().includes('design') ? <LayoutGrid className="w-12 h-12" /> : <Briefcase className="w-12 h-12" />}
+                        {job.category === 'Design' ? <LayoutGrid className="w-12 h-12" /> : <Briefcase className="w-12 h-12" />}
                       </div>
                       <div className="flex-1 space-y-6">
                         <div className="flex flex-col md:flex-row justify-between items-start gap-4">
@@ -200,6 +199,7 @@ export default function JobsPage() {
                             <h4 className="text-3xl font-black leading-tight group-hover:text-primary transition-colors">{job.title}</h4>
                             <div className="flex items-center gap-4">
                               <span className="text-sm font-bold text-muted-foreground flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {job.location || 'Remote'}</span>
+                              <Badge variant="secondary" className="bg-primary/5 text-primary text-[10px] font-black uppercase tracking-widest">{job.category || 'Development'}</Badge>
                               <span className="text-sm font-black text-emerald-600 uppercase tracking-widest">{job.type || 'Full-time'}</span>
                             </div>
                           </div>
@@ -210,7 +210,7 @@ export default function JobsPage() {
                         <p className="text-muted-foreground text-base font-medium line-clamp-2 leading-relaxed max-w-3xl">{job.description}</p>
                         <div className="flex flex-wrap items-center justify-between gap-6 pt-4 border-t border-muted/20">
                           <div className="flex flex-wrap gap-2">
-                            {(job.skills || ['React', 'Node.js']).map((skill: string) => (
+                            {(job.skills || []).map((skill: string) => (
                               <Badge key={skill} variant="secondary" className="bg-muted/20 text-[#111827] rounded-xl px-4 py-1.5 text-[10px] font-black uppercase tracking-widest border-none">{skill}</Badge>
                             ))}
                           </div>
@@ -223,11 +223,16 @@ export default function JobsPage() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              )) : (
+                <div className="text-center p-20 bg-white rounded-[2.5rem] border-dashed border-2">
+                  <p className="text-muted-foreground font-bold">No jobs found. Try adjusting your filters!</p>
+                </div>
+              )}
             </div>
           </TabsContent>
 
           <TabsContent value="workers" className="space-y-6">
+            {/* ... Workers tab content remains largely same but updated to be cleaner ... */}
             <div className="flex items-center justify-between px-4">
               <h3 className="text-2xl font-black tracking-tight">Elite Workers <span className="text-muted-foreground font-medium ml-2 text-lg">({filteredWorkers.length})</span></h3>
             </div>
@@ -267,7 +272,7 @@ export default function JobsPage() {
                     </div>
                     <div className="flex items-center gap-3 pt-2">
                       <Button variant="outline" className="flex-1 rounded-2xl h-14 font-black text-sm border-muted-foreground/10 hover:bg-muted/5 transition-colors">Profile</Button>
-                      <Button onClick={() => handleHire(worker.id)} className="flex-1 bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-2xl h-14 font-black text-sm shadow-xl shadow-primary/20">Hire Now</Button>
+                      <Button onClick={() => router.push(`/messages?hire=${worker.id}`)} className="flex-1 bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-2xl h-14 font-black text-sm shadow-xl shadow-primary/20">Hire Now</Button>
                     </div>
                   </CardContent>
                 </Card>

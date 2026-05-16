@@ -3,16 +3,12 @@
 import { useUser, useFirestore, useCollection } from '@/firebase';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { 
   Briefcase, 
-  MessageSquare, 
-  Bell, 
   Star, 
   MapPin, 
-  Search, 
   User, 
   Plus, 
   Bookmark, 
@@ -70,46 +66,23 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8F9FE] pb-24 lg:pb-10">
-      <div className="container mx-auto px-4 py-6">
-        {/* Top Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-              <span className="text-white text-xl font-headline font-black italic -ml-0.5">Q</span>
-            </div>
-            <span className="text-2xl font-headline font-black text-[#111827] tracking-tight">Quub</span>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="icon" className="rounded-xl relative">
-              <Bell className="w-5 h-5 text-muted-foreground" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white">3</span>
-            </Button>
-            <div className="hidden md:flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-muted-foreground/10 text-sm font-medium">
-              <MapPin className="w-4 h-4 text-primary" />
-              <span>Kathmandu, Nepal</span>
-              <ChevronRight className="w-4 h-4 rotate-90" />
-            </div>
-          </div>
-        </div>
-
+    <div className="min-h-screen bg-[#F8F9FE] pb-24 lg:pb-10 pt-8">
+      <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-12 gap-8">
           {/* Main Content Area */}
           <div className="lg:col-span-8 space-y-8">
             {/* Welcome Banner */}
-            <Card className="border-none shadow-none overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#6366f1] to-[#a855f7] text-white relative">
+            <Card className="border-none shadow-none overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#6366f1] to-[#a855f7] text-white relative">
               <CardContent className="p-10 flex items-center justify-between">
-                <div className="space-y-6 max-w-md relative z-10">
+                <div className="space-y-6 max-w-md relative z-10 text-left">
                   <h2 className="text-4xl font-black tracking-tight leading-tight">Good Morning, {user.displayName?.split(' ')[0] || 'User'} 👋</h2>
                   <p className="text-primary-foreground/90 font-medium">Find work. Find workers. Build faster with Quub.</p>
-                  <Button className="bg-white text-primary hover:bg-white/90 rounded-2xl h-12 px-8 font-black text-sm">
+                  <Button className="bg-white text-primary hover:bg-white/90 rounded-[1.25rem] h-12 px-8 font-black text-sm">
                     Explore Jobs <ChevronRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>
-                <div className="hidden md:block relative w-48 h-48">
+                <div className="hidden md:block relative w-48 h-48 shrink-0">
                    <div className="absolute top-0 right-0 w-full h-full bg-white/10 rounded-full blur-3xl" />
-                   {/* Placeholder for character illustration */}
                    <div className="relative z-10 w-full h-full flex items-center justify-center">
                      <LayoutDashboard className="w-32 h-32 opacity-20" />
                    </div>
@@ -120,7 +93,7 @@ export default function DashboardPage() {
             {/* Quick Actions Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {quickActions.map((action, i) => (
-                <Card key={i} className="border-none shadow-sm rounded-3xl bg-white hover:scale-[1.02] transition-all cursor-pointer">
+                <Card key={i} className="border-none shadow-sm rounded-[2rem] bg-white hover:scale-[1.02] transition-all cursor-pointer">
                   <CardContent className="p-6 flex flex-col items-center text-center gap-3">
                     <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center", action.color)}>
                       <action.icon className="w-6 h-6" />
@@ -145,14 +118,14 @@ export default function DashboardPage() {
                   [1, 2, 3].map(i => <div key={i} className="h-28 bg-white rounded-3xl animate-pulse" />)
                 ) : recentJobs?.length ? (
                   recentJobs.map((job) => (
-                    <Card key={job.id} className="border-none shadow-sm rounded-3xl bg-white group hover:shadow-md transition-all">
+                    <Card key={job.id} className="border-none shadow-sm rounded-[2rem] bg-white group hover:shadow-md transition-all">
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
                             <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center font-bold">
                               {job.employerName?.[0] || 'Q'}
                             </div>
-                            <div className="space-y-1">
+                            <div className="text-left space-y-1">
                               <h4 className="font-black text-lg group-hover:text-primary transition-colors">{job.title}</h4>
                               <p className="text-xs text-muted-foreground font-medium">{job.type || 'Web Development'}</p>
                               <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
@@ -170,7 +143,7 @@ export default function DashboardPage() {
                     </Card>
                   ))
                 ) : (
-                  <Card className="border-dashed border-2 bg-white text-center p-12 rounded-3xl">
+                  <Card className="border-dashed border-2 bg-white text-center p-12 rounded-[2rem]">
                     <p className="text-muted-foreground font-medium">No nearby opportunities found.</p>
                   </Card>
                 )}
@@ -181,9 +154,12 @@ export default function DashboardPage() {
           {/* Sidebar Area */}
           <div className="lg:col-span-4 space-y-8">
             {/* Profile Card */}
-            <Card className="border-none shadow-sm rounded-3xl bg-white">
+            <Card className="border-none shadow-sm rounded-[2.5rem] bg-white overflow-hidden">
               <CardContent className="p-8 space-y-6">
                 <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="w-20 h-20 bg-primary/10 rounded-[1.5rem] flex items-center justify-center">
+                    <User className="w-10 h-10 text-primary" />
+                  </div>
                   <div>
                     <h3 className="font-black text-xl">{user.displayName || 'Quuber User'}</h3>
                     <p className="text-xs font-bold text-muted-foreground">Frontend Developer</p>
@@ -197,7 +173,7 @@ export default function DashboardPage() {
                        <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
                          <Star className="w-5 h-5" />
                        </div>
-                       <div>
+                       <div className="text-left">
                          <p className="text-[10px] font-bold text-muted-foreground uppercase">Wallet Balance</p>
                          <p className="text-sm font-black">NPR 2,450</p>
                        </div>
@@ -209,7 +185,7 @@ export default function DashboardPage() {
                        <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center">
                          <Zap className="w-5 h-5" />
                        </div>
-                       <div>
+                       <div className="text-left">
                          <p className="text-[10px] font-bold text-muted-foreground uppercase">Account Type</p>
                          <p className="text-sm font-black">Freelancer</p>
                        </div>
@@ -228,8 +204,8 @@ export default function DashboardPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 {overviewStats.map((stat, i) => (
-                  <Card key={i} className="border-none shadow-sm rounded-3xl bg-white">
-                    <CardContent className="p-6 flex flex-col gap-4">
+                  <Card key={i} className="border-none shadow-sm rounded-[2rem] bg-white">
+                    <CardContent className="p-6 flex flex-col gap-4 text-left">
                       <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", stat.color)}>
                         <stat.icon className="w-5 h-5" />
                       </div>
@@ -244,8 +220,8 @@ export default function DashboardPage() {
             </div>
 
             {/* Tip of the day */}
-            <Card className="border-none shadow-none rounded-[2rem] bg-gradient-to-br from-[#6366f1] to-[#a855f7] text-white overflow-hidden">
-              <CardContent className="p-8 space-y-6">
+            <Card className="border-none shadow-none rounded-[2.5rem] bg-gradient-to-br from-[#6366f1] to-[#a855f7] text-white overflow-hidden">
+              <CardContent className="p-8 space-y-6 text-left">
                 <div className="flex items-center justify-between">
                    <div className="space-y-2">
                      <h4 className="font-black text-lg">Tip of the day</h4>

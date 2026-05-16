@@ -5,21 +5,50 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/firebase';
-import { Bell, MapPin, ChevronDown, Search } from 'lucide-react';
+import { Bell, MapPin, ChevronDown, Search, Navigation } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Navbar() {
   const { user } = useUser();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const [location, setLocation] = useState<string>('Remote');
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    // Listen for location changes in localStorage (simple sync for MVP)
+    const checkLocation = () => {
+      const loc = localStorage.getItem('quub_location') || 'Remote';
+      if (loc !== location) setLocation(loc);
+    };
+
+    const interval = setInterval(checkLocation, 2000);
+    return () => clearInterval(interval);
+  }, [location]);
+
+  const updateLocation = (newLoc: string) => {
+    setLocation(newLoc);
+    localStorage.setItem('quub_location', newLoc);
+  };
+
+  if (!mounted) return (
+    <header className="sticky top-0 z-50 w-full bg-white border-b border-muted/10 hidden md:block">
+      <div className="container mx-auto px-4 flex h-20 items-center justify-between">
+        <div className="w-10 h-10 bg-[#6366f1] rounded-xl" />
+        <div className="h-6 w-64 bg-muted animate-pulse rounded-lg" />
+      </div>
+    </header>
+  );
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white border-b border-muted/10 hidden md:block">
+    <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-muted/10 hidden md:block">
       <div className="container mx-auto px-4 flex h-20 items-center justify-between">
         {/* Logo Section */}
         <Link href="/" className="flex items-center gap-3 group">
@@ -29,52 +58,65 @@ export function Navbar() {
           <span className="text-2xl font-headline font-black text-[#111827] tracking-tight">Quub</span>
         </Link>
 
-        {/* Dynamic Nav Content - Only show after mount to avoid hydration mismatch */}
+        {/* Dynamic Nav Content */}
         <div className="flex items-center gap-8">
-          {mounted && user ? (
+          {user ? (
             <>
-              <nav className="flex items-center gap-6">
-                <Link href="/dashboard" className={cn("text-sm font-black transition-colors", pathname === '/dashboard' ? "text-[#6366f1]" : "text-muted-foreground hover:text-foreground")}>Dashboard</Link>
-                <Link href="/jobs" className={cn("text-sm font-black transition-colors", pathname === '/jobs' ? "text-[#6366f1]" : "text-muted-foreground hover:text-foreground")}>Jobs</Link>
-                <Link href="/messages" className={cn("text-sm font-black transition-colors", pathname === '/messages' ? "text-[#6366f1]" : "text-muted-foreground hover:text-foreground")}>Messages</Link>
+              <nav className="flex items-center gap-8">
+                <Link href="/dashboard" className={cn("text-sm font-black transition-colors uppercase tracking-widest", pathname === '/dashboard' ? "text-[#6366f1]" : "text-muted-foreground hover:text-foreground")}>Dashboard</Link>
+                <Link href="/jobs" className={cn("text-sm font-black transition-colors uppercase tracking-widest", pathname === '/jobs' ? "text-[#6366f1]" : "text-muted-foreground hover:text-foreground")}>Jobs Hub</Link>
+                <Link href="/messages" className={cn("text-sm font-black transition-colors uppercase tracking-widest", pathname === '/messages' ? "text-[#6366f1]" : "text-muted-foreground hover:text-foreground")}>Messages</Link>
               </nav>
 
-              <div className="flex items-center gap-4 border-l pl-8">
-                <Button variant="ghost" size="icon" className="rounded-2xl relative bg-muted/30 hover:bg-muted/50 w-11 h-11">
+              <div className="flex items-center gap-4 border-l pl-8 border-muted-foreground/10">
+                <Button variant="ghost" size="icon" className="rounded-2xl relative bg-muted/20 hover:bg-muted/40 w-12 h-12 transition-all">
                   <Search className="w-5 h-5 text-muted-foreground" />
                 </Button>
-                <Button variant="ghost" size="icon" className="rounded-2xl relative bg-muted/30 hover:bg-muted/50 w-11 h-11">
+                <Button variant="ghost" size="icon" className="rounded-2xl relative bg-muted/20 hover:bg-muted/40 w-12 h-12 transition-all">
                   <Bell className="w-5 h-5 text-muted-foreground" />
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#6366f1] text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white font-black">3</span>
+                  <span className="absolute top-1 right-1 w-5 h-5 bg-[#6366f1] text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white font-black">3</span>
                 </Button>
                 
-                <div className="flex items-center gap-3 bg-white px-5 py-2.5 rounded-[1.25rem] border border-muted-foreground/10 shadow-sm cursor-pointer hover:bg-muted/5 transition-colors">
-                  <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <MapPin className="w-4 h-4 text-primary" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest leading-none mb-1">Your Location</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-black text-[#111827]">Kathmandu, Nepal</span>
-                      <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <div className="flex items-center gap-4 bg-white px-6 py-3 rounded-[1.25rem] border border-muted-foreground/10 shadow-sm cursor-pointer hover:bg-muted/5 transition-all group">
+                      <div className="w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <MapPin className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="flex flex-col text-left">
+                        <span className="text-[9px] font-black uppercase text-muted-foreground tracking-[0.2em] leading-none mb-1">Your Location</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-black text-[#111827]">{location}</span>
+                          <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="rounded-2xl w-56 p-2 shadow-2xl">
+                    <DropdownMenuItem onClick={() => updateLocation('Remote')} className="rounded-xl font-bold py-3 px-4 gap-2">
+                      <Navigation className="w-4 h-4 text-primary" /> Global / Remote
+                    </DropdownMenuItem>
+                    <div className="h-px bg-muted my-1" />
+                    {["Kathmandu", "Pokhara", "Lalitpur", "Biratnagar"].map(city => (
+                      <DropdownMenuItem key={city} onClick={() => updateLocation(city)} className={cn("rounded-xl font-bold py-3 px-4", location === city && "bg-primary/5 text-primary")}>
+                        {city}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </>
           ) : (
-            mounted && (
-              <div className="flex items-center gap-8">
-                <Link href="/auth/signin" className="text-sm font-bold text-[#4B5563] hover:text-primary transition-colors">
-                  Sign In
-                </Link>
-                <Link href="/auth/signup">
-                  <Button className="font-bold rounded-[1.25rem] px-8 h-12 bg-[#6366f1] shadow-xl shadow-primary/20 hover:scale-105 transition-all text-sm">
-                    Get Started
-                  </Button>
-                </Link>
-              </div>
-            )
+            <div className="flex items-center gap-8">
+              <Link href="/auth/signin" className="text-sm font-black uppercase tracking-widest text-[#4B5563] hover:text-primary transition-colors">
+                Sign In
+              </Link>
+              <Link href="/auth/signup">
+                <Button className="font-black rounded-[1.25rem] px-10 h-14 bg-[#6366f1] shadow-xl shadow-primary/20 hover:scale-105 transition-all text-sm uppercase tracking-widest">
+                  Get Started
+                </Button>
+              </Link>
+            </div>
           )}
         </div>
       </div>

@@ -25,7 +25,6 @@ export function Navbar() {
           <nav className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-8 text-sm font-bold text-muted-foreground">
             <Link href="/work" className="hover:text-primary transition-colors">Work</Link>
             <Link href="/workers" className="hover:text-primary transition-colors">Workers</Link>
-            <Link href="/messages" className="hover:text-primary transition-colors">Messages</Link>
           </nav>
         )}
 

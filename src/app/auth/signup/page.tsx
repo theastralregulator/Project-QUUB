@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from 'react';
@@ -6,16 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Mail, Lock, User, Phone, AlertCircle, Github } from 'lucide-react';
+import { Loader2, Mail, Lock, User, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { 
   createUserWithEmailAndPassword, 
-  updateProfile,
-  signInWithPopup,
-  GithubAuthProvider
+  updateProfile
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -35,46 +32,6 @@ export default function SignUpPage() {
   const db = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
-
-  const handleGithubSignUp = async () => {
-    if (!auth || !db) return;
-    setLoading(true);
-    const provider = new GithubAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      // Check if profile exists
-      const userRef = doc(db, 'users', user.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        const userProfileData = {
-          name: user.displayName || 'GitHub User',
-          email: user.email || '',
-          phone: '',
-          userType: 'both',
-          skills: [],
-          bio: '',
-          location: 'Remote',
-          avatarUrl: user.photoURL || `https://picsum.photos/seed/${user.uid}/200`,
-          githubUrl: `https://github.com/${(user as any).reloadUserInfo?.screenName || ''}`,
-          rating: 5.0,
-          reviewsCount: 0,
-          availabilityStatus: 'available',
-          createdAt: serverTimestamp()
-        };
-        await setDoc(userRef, userProfileData);
-      }
-
-      toast({ title: "Welcome!", description: "Successfully signed up with GitHub." });
-      router.push('/dashboard');
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "GitHub Auth Failed", description: error.message });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSignUp = async () => {
     if (!auth || !db) return;
@@ -109,7 +66,6 @@ export default function SignUpPage() {
         bio: '',
         location: 'Remote',
         avatarUrl: `https://picsum.photos/seed/${user.uid}/200`,
-        githubUrl: '',
         rating: 5.0,
         reviewsCount: 0,
         availabilityStatus: 'available',
@@ -160,22 +116,6 @@ export default function SignUpPage() {
               <AlertDescription>{authError}</AlertDescription>
             </Alert>
           )}
-
-          <div className="grid grid-cols-1 gap-4">
-            <Button 
-              variant="outline" 
-              onClick={handleGithubSignUp}
-              disabled={loading}
-              className="h-14 rounded-2xl font-black border-muted-foreground/10 gap-3 hover:bg-muted/5 transition-colors"
-            >
-              <Github className="w-5 h-5" /> Continue with GitHub
-            </Button>
-          </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-            <div className="relative flex justify-center text-[10px] uppercase"><span className="bg-white px-4 text-muted-foreground font-black tracking-widest">or continue with email</span></div>
-          </div>
 
           <div className="space-y-5">
             <div className="grid md:grid-cols-2 gap-4">

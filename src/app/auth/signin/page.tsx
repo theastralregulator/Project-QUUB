@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from 'react';
@@ -6,15 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Mail, Lock, LogIn, Github } from 'lucide-react';
+import { Loader2, Mail, Lock, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth, useFirestore } from '@/firebase';
 import { 
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  GithubAuthProvider
+  signInWithEmailAndPassword
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 
@@ -26,7 +22,6 @@ export default function SignInPage() {
   });
 
   const auth = useAuth();
-  const db = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -58,48 +53,6 @@ export default function SignInPage() {
     }
   };
 
-  const handleGithubSignIn = async () => {
-    if (!auth || !db) return;
-    setLoading(true);
-    const provider = new GithubAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      // Check if Firestore profile exists
-      const userRef = doc(db, 'users', user.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        await setDoc(userRef, {
-          name: user.displayName || 'GitHub User',
-          email: user.email || '',
-          userType: 'both',
-          skills: [],
-          bio: '',
-          location: 'Remote',
-          avatarUrl: user.photoURL || `https://picsum.photos/seed/${user.uid}/200`,
-          githubUrl: `https://github.com/${(user as any).reloadUserInfo?.screenName || ''}`,
-          rating: 5.0,
-          reviewsCount: 0,
-          availabilityStatus: 'available',
-          createdAt: serverTimestamp()
-        });
-      }
-
-      toast({ title: "Welcome!", description: "Signed in with GitHub." });
-      router.push('/dashboard');
-    } catch (error: any) {
-      toast({ 
-        variant: "destructive", 
-        title: "GitHub Auth Failed", 
-        description: error.message 
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 bg-muted/20">
       <Card className="w-full max-w-xl rounded-[2.5rem] border-none shadow-2xl bg-white overflow-hidden animate-in fade-in zoom-in-95 duration-500">
@@ -116,22 +69,6 @@ export default function SignInPage() {
         </CardHeader>
 
         <CardContent className="p-10 pt-8 space-y-8">
-          <div className="grid grid-cols-1 gap-4">
-            <Button 
-              variant="outline" 
-              onClick={handleGithubSignIn}
-              disabled={loading}
-              className="h-14 rounded-2xl font-black border-muted-foreground/10 gap-3 hover:bg-muted/5 transition-colors"
-            >
-              <Github className="w-5 h-5" /> Continue with GitHub
-            </Button>
-          </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-            <div className="relative flex justify-center text-[10px] uppercase"><span className="bg-white px-4 text-muted-foreground font-black tracking-widest">or continue with email</span></div>
-          </div>
-
           <div className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-xs font-black uppercase tracking-widest ml-1">Email Address</Label>

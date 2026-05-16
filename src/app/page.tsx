@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,17 +16,13 @@ import {
   Facebook,
   Instagram,
   Twitter,
-  Linkedin,
-  Github
+  Linkedin
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { cn } from '@/lib/utils';
 
 export default function LandingPage() {
-  const GITHUB_REPO = "https://github.com/theastralregulator/Project-QUUB.git";
-
   const mockups = [
     PlaceHolderImages.find(img => img.id === 'hero-mockup-1'),
     PlaceHolderImages.find(img => img.id === 'hero-mockup-2'),
@@ -66,13 +61,6 @@ export default function LandingPage() {
       desc: "Save jobs and workers, and easily track your recent activity.",
       icon: Bookmark,
     }
-  ];
-
-  const stats = [
-    { label: "Active Users", value: "10K+", icon: Users2 },
-    { label: "Jobs Posted", value: "25K+", icon: Briefcase },
-    { label: "User Rating", value: "4.8/5", icon: Star },
-    { label: "Trusted Platform", value: "100%", icon: CheckCircle2 },
   ];
 
   return (
@@ -209,9 +197,6 @@ export default function LandingPage() {
                 <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Instagram className="w-4 h-4" /></Button>
                 <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Twitter className="w-4 h-4" /></Button>
                 <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Linkedin className="w-4 h-4" /></Button>
-                <Link href={GITHUB_REPO} target="_blank">
-                  <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Github className="w-4 h-4" /></Button>
-                </Link>
               </div>
             </div>
             <div>

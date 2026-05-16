@@ -32,7 +32,7 @@ export default function ProfilePage() {
   const db = useFirestore();
   const [mounted, setMounted] = useState(false);
 
-  const GITHUB_REPO = "https://github.com/theastralregulator/Project-QUUB";
+  const GITHUB_REPO = "https://github.com/theastralregulator/Project-QUUB.git";
 
   const userRef = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -128,9 +128,9 @@ export default function ProfilePage() {
               <p className="text-lg font-bold text-[#6B7280]">{profileData?.bio || "Professional Member"}</p>
               <div className="flex items-center justify-center gap-3">
                 <Badge variant="secondary" className="bg-[#EBEFFF] text-[#6366f1] font-black px-5 py-1.5 rounded-full text-[10px] uppercase tracking-widest border-none">Premium Member</Badge>
-                <Link href={profileData?.githubUrl || GITHUB_REPO} target="_blank">
+                <Link href={GITHUB_REPO} target="_blank">
                   <Button variant="outline" size="sm" className="rounded-full h-8 px-4 gap-2 border-muted-foreground/10 bg-white text-xs font-black uppercase tracking-widest hover:bg-muted/5">
-                    <Github className="w-3.5 h-3.5" /> GitHub
+                    <Github className="w-3.5 h-3.5" /> Project Repo
                   </Button>
                 </Link>
               </div>

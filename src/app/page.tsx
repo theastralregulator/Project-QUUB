@@ -26,7 +26,7 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { cn } from '@/lib/utils';
 
 export default function LandingPage() {
-  const GITHUB_REPO = "https://github.com/theastralregulator/Project-QUUB";
+  const GITHUB_REPO = "https://github.com/theastralregulator/Project-QUUB.git";
 
   const mockups = [
     PlaceHolderImages.find(img => img.id === 'hero-mockup-1'),
@@ -164,25 +164,6 @@ export default function LandingPage() {
                   <p className="text-sm text-[#6B7280] leading-relaxed">{f.desc}</p>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Banner */}
-      <section className="py-12 bg-primary">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((s, i) => (
-              <div key={i} className="flex items-center justify-center gap-4 text-white">
-                <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
-                  <s.icon className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-2xl font-black leading-none">{s.value}</p>
-                  <p className="text-xs font-bold text-white/70 uppercase tracking-widest mt-1">{s.label}</p>
-                </div>
-              </div>
             ))}
           </div>
         </div>

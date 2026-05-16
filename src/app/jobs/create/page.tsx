@@ -2,7 +2,7 @@
 "use client"
 
 import { useState } from 'react';
-import { useUser, useFirestore } from '@/firebase';
+import { useUser, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -49,7 +49,7 @@ export default function CreateJobPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !db) return;
 
@@ -59,23 +59,35 @@ export default function CreateJobPage() {
     }
 
     setLoading(true);
-    try {
-      await addDoc(collection(db, 'jobs'), {
-        ...formData,
-        skills: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
-        postedBy: user.uid,
-        employerName: user.displayName || 'Anonymous',
-        createdAt: serverTimestamp(),
-        isUrgent: false
+
+    const jobData = {
+      title: formData.title,
+      description: formData.description,
+      budget: formData.budget,
+      location: formData.location,
+      type: formData.type,
+      skills: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
+      postedBy: user.uid,
+      employerName: user.displayName || 'Anonymous',
+      createdAt: serverTimestamp(),
+      isUrgent: false
+    };
+
+    // Non-blocking mutation for better UX
+    addDoc(collection(db, 'jobs'), jobData)
+      .catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: 'jobs',
+          operation: 'create',
+          requestResourceData: jobData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        setLoading(false);
       });
 
-      toast({ title: "Job Posted!", description: "Your opportunity is now live." });
-      router.push('/dashboard');
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: error.message });
-    } finally {
-      setLoading(false);
-    }
+    // Optimistic UI response
+    toast({ title: "Job Posted!", description: "Your opportunity is now live." });
+    router.push('/dashboard');
   };
 
   if (!user) return null;

@@ -9,6 +9,7 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function LandingPage() {
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-bg');
+  const heroSrc = heroImg?.imageUrl || 'https://picsum.photos/seed/quub-hero/1200/800';
   
   const popularCategories = [
     "UI/UX Design", "Web Development", "Content Writing", "Video Editing", "Marketing", "SEO"
@@ -49,8 +50,8 @@ export default function LandingPage() {
             <div className="max-w-2xl mx-auto pt-8">
               <div className="relative group">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <Input 
-                  className="w-full h-16 rounded-full pl-12 pr-4 text-lg border-2 border-primary/10 bg-white focus-visible:ring-primary/20 shadow-xl"
+                <input 
+                  className="w-full h-16 rounded-full pl-12 pr-4 text-lg border-2 border-primary/10 bg-white focus:outline-none focus:border-primary/40 shadow-xl"
                   placeholder="Search skills, projects, or people..."
                 />
               </div>
@@ -138,7 +139,7 @@ export default function LandingPage() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="relative aspect-square md:aspect-video lg:aspect-square rounded-3xl overflow-hidden shadow-2xl">
               <Image 
-                src={heroImg?.imageUrl || ''} 
+                src={heroSrc} 
                 alt="Quub Platform" 
                 fill 
                 className="object-cover"
@@ -207,7 +208,7 @@ export default function LandingPage() {
             <div className="space-y-4">
               <h4 className="font-bold uppercase tracking-widest text-xs opacity-50">Newsletter</h4>
               <div className="flex gap-2">
-                <Input className="bg-white/10 border-none text-white placeholder:text-white/40" placeholder="Your email" />
+                <input className="bg-white/10 border-none text-white placeholder:text-white/40 px-4 py-2 rounded-md focus:outline-none flex-1" placeholder="Your email" />
                 <Button variant="secondary">Join</Button>
               </div>
             </div>

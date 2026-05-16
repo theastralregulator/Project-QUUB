@@ -1,40 +1,41 @@
+
 {
   "placeholderImages": [
     {
-      "id": "hero-bg",
-      "description": "Modern freelance workspace with laptop",
-      "imageUrl": "https://picsum.photos/seed/quub-hero/1200/800",
-      "imageHint": "freelance workspace"
+      "id": "hero-mockup-1",
+      "description": "Quub App Dashboard Mockup",
+      "imageUrl": "https://picsum.photos/seed/mockup1/400/800",
+      "imageHint": "mobile dashboard"
     },
     {
-      "id": "avatar-1",
-      "description": "Professional female freelancer",
-      "imageUrl": "https://picsum.photos/seed/avatar1/200/200",
-      "imageHint": "professional woman"
+      "id": "hero-mockup-2",
+      "description": "Quub Worker Profile Mockup",
+      "imageUrl": "https://picsum.photos/seed/mockup2/400/800",
+      "imageHint": "worker profile"
     },
     {
-      "id": "avatar-2",
-      "description": "Young male designer",
-      "imageUrl": "https://picsum.photos/seed/avatar2/200/200",
-      "imageHint": "male designer"
+      "id": "avatar-group-1",
+      "description": "User Avatar 1",
+      "imageUrl": "https://picsum.photos/seed/user1/100/100",
+      "imageHint": "human face"
     },
     {
-      "id": "avatar-3",
-      "description": "Tech entrepreneur",
-      "imageUrl": "https://picsum.photos/seed/avatar3/200/200",
-      "imageHint": "tech person"
+      "id": "avatar-group-2",
+      "description": "User Avatar 2",
+      "imageUrl": "https://picsum.photos/seed/user2/100/100",
+      "imageHint": "human face"
     },
     {
-      "id": "project-1",
-      "description": "Mobile app UI design project",
-      "imageUrl": "https://picsum.photos/seed/project1/600/400",
-      "imageHint": "app design"
+      "id": "avatar-group-3",
+      "description": "User Avatar 3",
+      "imageUrl": "https://picsum.photos/seed/user3/100/100",
+      "imageHint": "human face"
     },
     {
-      "id": "project-2",
-      "description": "Web development landing page",
-      "imageUrl": "https://picsum.photos/seed/project2/600/400",
-      "imageHint": "website coding"
+      "id": "avatar-group-4",
+      "description": "User Avatar 4",
+      "imageUrl": "https://picsum.photos/seed/user4/100/100",
+      "imageHint": "human face"
     }
   ]
 }

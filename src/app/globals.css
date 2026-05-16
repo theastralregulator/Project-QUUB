@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -23,7 +24,7 @@
     --border: 263 20% 88%;
     --input: 263 20% 88%;
     --ring: 263 75% 51%;
-    --radius: 1rem;
+    --radius: 1.5rem;
   }
 
   .dark {
@@ -67,4 +68,13 @@
 
 .mobile-bottom-nav {
   @apply fixed bottom-0 left-0 right-0 h-16 bg-white border-t flex items-center justify-around z-50 md:hidden;
+}
+
+/* Custom scrollbar for no-scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

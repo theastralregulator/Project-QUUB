@@ -38,11 +38,9 @@ import {
   XAxis, 
   YAxis, 
   CartesianGrid, 
-  Tooltip as RechartsTooltip, 
-  ResponsiveContainer,
   Cell
 } from 'recharts';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { recommendRecommendations, type RecommendationOutput } from '@/ai/flows/recommendation-flow';
 import { useToast } from '@/hooks/use-toast';
 
@@ -135,6 +133,13 @@ export default function DashboardPage() {
     { day: 'Sat', apps: 2 },
     { day: 'Sun', apps: 3 },
   ];
+
+  const chartConfig = {
+    apps: {
+      label: "Applications",
+      color: "hsl(var(--primary))",
+    },
+  } satisfies ChartConfig;
 
   if (!user) {
     return (
@@ -383,14 +388,14 @@ export default function DashboardPage() {
                 <p className="text-xs text-muted-foreground font-medium">Your application progress</p>
               </CardHeader>
               <CardContent className="p-8 pt-6 h-[220px]">
-                <ResponsiveContainer width="100%" height="100%">
+                <ChartContainer config={chartConfig} className="h-full w-full">
                   <BarChart data={activityData}>
                     <Bar 
                       dataKey="apps" 
                       radius={[6, 6, 0, 0]}
                     >
                       {activityData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={index === 3 ? '#6366f1' : '#E0E7FF'} />
+                        <Cell key={`cell-${index}`} fill={index === 3 ? 'var(--color-apps)' : '#E0E7FF'} />
                       ))}
                     </Bar>
                     <XAxis 
@@ -399,12 +404,12 @@ export default function DashboardPage() {
                       tickLine={false} 
                       tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} 
                     />
-                    <RechartsTooltip 
+                    <ChartTooltip 
                       cursor={{ fill: 'transparent' }}
                       content={<ChartTooltipContent hideLabel />}
                     />
                   </BarChart>
-                </ResponsiveContainer>
+                </ChartContainer>
               </CardContent>
             </Card>
 

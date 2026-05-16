@@ -1,9 +1,9 @@
 
 "use client"
 
-import { useState } from 'react';
-import { useFirestore, useCollection } from '@/firebase';
-import { collection, query, orderBy, limit, where } from 'firebase/firestore';
+import { useState, useMemo } from 'react';
+import { useFirestore, useCollection, useUser } from '@/firebase';
+import { collection, query, orderBy, limit, where, doc, setDoc, serverTimestamp, addDoc } from 'firebase/firestore';
 import { useMemoFirebase } from '@/firebase/use-memo-firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,163 +23,244 @@ import {
   Briefcase,
   Users,
   LayoutGrid,
-  Loader2
+  Loader2,
+  CheckCircle2,
+  TrendingUp,
+  Zap,
+  ArrowRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 export default function JobsPage() {
+  const { user } = useUser();
   const db = useFirestore();
+  const { toast } = useToast();
+  const router = useRouter();
+  
   const [activeTab, setActiveTab] = useState('works');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
-  // Queries
+  // Queries for Works (Jobs)
   const jobsQuery = useMemoFirebase(() => {
     if (!db) return null;
-    return query(collection(db, 'jobs'), orderBy('createdAt', 'desc'), limit(15));
+    let baseQuery = collection(db, 'jobs');
+    return query(baseQuery, orderBy('createdAt', 'desc'), limit(30));
   }, [db]);
 
+  // Queries for Workers (Users with worker role)
   const workersQuery = useMemoFirebase(() => {
     if (!db) return null;
-    return query(collection(db, 'users'), where('userType', 'in', ['worker', 'both']), limit(15));
+    return query(collection(db, 'users'), where('userType', 'in', ['worker', 'both']), limit(30));
   }, [db]);
 
-  const { data: jobs, loading: jobsLoading } = useCollection(jobsQuery);
-  const { data: workers, loading: workersLoading } = useCollection(workersQuery);
+  const { data: rawJobs, loading: jobsLoading } = useCollection(jobsQuery);
+  const { data: rawWorkers, loading: workersLoading } = useCollection(workersQuery);
 
-  const categories = ["All", "Design", "Development", "Writing", "Marketing", "Data & Analytics", "Video & Animation"];
+  // Client-side filtering for demonstration of "Real Functionality" 
+  // (Firestore text search is limited without Algolia/Elasticsearch)
+  const filteredJobs = useMemo(() => {
+    if (!rawJobs) return [];
+    return rawJobs.filter(job => {
+      const matchesSearch = job.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                           job.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === 'All' || job.type?.toLowerCase() === selectedCategory.toLowerCase();
+      return matchesSearch && matchesCategory;
+    });
+  }, [rawJobs, searchQuery, selectedCategory]);
+
+  const filteredWorkers = useMemo(() => {
+    if (!rawWorkers) return [];
+    return rawWorkers.filter(worker => {
+      const matchesSearch = worker.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                           worker.skills?.some((s: string) => s.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchesSearch;
+    });
+  }, [rawWorkers, searchQuery]);
+
+  const categories = ["All", "Design", "Development", "Writing", "Marketing", "Remote"];
+
+  const handleSaveJob = (jobId: string) => {
+    if (!user || !db) {
+      toast({ title: "Auth Required", description: "Please sign in to save jobs." });
+      return;
+    }
+    const saveRef = doc(db, 'users', user.uid, 'savedJobs', jobId);
+    setDoc(saveRef, { jobId, savedAt: serverTimestamp() });
+    toast({ title: "Saved!", description: "Job added to your collection." });
+  };
+
+  const handleApply = async (job: any) => {
+    if (!user || !db) {
+      toast({ title: "Auth Required", description: "Please sign in to apply." });
+      return;
+    }
+    try {
+      await addDoc(collection(db, 'applications'), {
+        jobId: job.id,
+        jobTitle: job.title,
+        userId: user.uid,
+        userName: user.displayName,
+        appliedAt: serverTimestamp(),
+        status: 'pending'
+      });
+      toast({ title: "Application Sent!", description: `You've applied for ${job.title}.` });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Error", description: "Failed to submit application." });
+    }
+  };
+
+  const handleHire = (workerId: string) => {
+    router.push(`/messages?hire=${workerId}`);
+  };
 
   return (
     <div className="min-h-screen bg-[#F8F9FE] pb-24 lg:pb-12">
       <div className="container mx-auto px-4 pt-8">
+        
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
           <div className="space-y-1">
-            <h1 className="text-4xl font-black tracking-tight">Job</h1>
-            <p className="text-muted-foreground font-medium">Find work or find skilled workers.</p>
+            <h1 className="text-5xl font-black tracking-tight text-[#111827]">Job Hub</h1>
+            <p className="text-lg text-muted-foreground font-medium">Discover elite opportunities or hire world-class talent.</p>
           </div>
-          <Button className="bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-[1.25rem] h-12 px-8 font-black text-sm shadow-xl shadow-primary/20">
-            <Plus className="w-4 h-4 mr-2" /> Post a Job
-          </Button>
+          <Link href="/jobs/create">
+            <Button className="bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-2xl h-14 px-8 font-black text-sm shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform">
+              <Plus className="w-5 h-5 mr-2" /> Post a Job
+            </Button>
+          </Link>
         </div>
 
-        <Tabs defaultValue="works" className="space-y-8" onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <div className="flex justify-center">
-            <TabsList className="h-20 bg-white border p-1 rounded-[1.5rem] w-full max-w-2xl shadow-sm">
+            <TabsList className="h-20 bg-white border p-1.5 rounded-[2rem] w-full max-w-2xl shadow-sm">
               <TabsTrigger 
                 value="works" 
-                className="flex-1 rounded-[1.25rem] h-full data-[state=active]:bg-[#F8F9FE] data-[state=active]:text-[#6366f1] flex flex-col gap-1 transition-all"
+                className="flex-1 rounded-[1.75rem] h-full data-[state=active]:bg-[#F8F9FE] data-[state=active]:text-[#6366f1] data-[state=active]:shadow-sm flex flex-col gap-1 transition-all"
               >
                 <div className="flex items-center gap-2">
                   <Briefcase className="w-5 h-5" />
-                  <span className="font-black">Works</span>
+                  <span className="font-black text-base">Works</span>
                 </div>
-                <span className="text-[10px] font-medium opacity-70">Find jobs and projects</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">Find Gigs</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="workers" 
-                className="flex-1 rounded-[1.25rem] h-full data-[state=active]:bg-[#F8F9FE] data-[state=active]:text-[#6366f1] flex flex-col gap-1 transition-all"
+                className="flex-1 rounded-[1.75rem] h-full data-[state=active]:bg-[#F8F9FE] data-[state=active]:text-[#6366f1] data-[state=active]:shadow-sm flex flex-col gap-1 transition-all"
               >
                 <div className="flex items-center gap-2">
                   <Users className="w-5 h-5" />
-                  <span className="font-black">Workers</span>
+                  <span className="font-black text-base">Workers</span>
                 </div>
-                <span className="text-[10px] font-medium opacity-70">Find skilled workers</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">Find Talent</span>
               </TabsTrigger>
             </TabsList>
           </div>
 
-          {/* Search & Filter Header (Shared style) */}
-          <div className="bg-white rounded-[2rem] p-6 shadow-sm border space-y-6">
+          {/* Functional Search & Filter Bar */}
+          <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border space-y-8">
             <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <div className="relative flex-1 group">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input 
-                  className="pl-12 h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-medium" 
-                  placeholder={activeTab === 'works' ? "Search jobs by title, skill or keyword..." : "Search workers by name, skill or role..."} 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-14 h-16 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary/20 font-bold text-lg placeholder:text-muted-foreground/50" 
+                  placeholder={activeTab === 'works' ? "Search jobs, skills, companies..." : "Search names, expertise, tags..."} 
                 />
               </div>
               <div className="flex items-center gap-4">
-                <Button variant="outline" className="h-14 rounded-2xl px-6 font-bold border-muted/50 gap-2">
-                  <MapPin className="w-4 h-4 text-muted-foreground" />
-                  All Nepal <ChevronDown className="w-4 h-4" />
+                <Button variant="outline" className="h-16 rounded-2xl px-8 font-black border-muted-foreground/10 bg-white gap-3 text-sm">
+                  <MapPin className="w-5 h-5 text-primary" />
+                  Nepal <ChevronDown className="w-4 h-4" />
                 </Button>
-                <Button variant="outline" className="h-14 rounded-2xl px-6 font-bold border-muted/50 gap-2 text-[#6366f1]">
-                  <Filter className="w-4 h-4" />
-                  Filters
+                <Button variant="outline" className="h-16 rounded-2xl px-6 font-black border-muted-foreground/10 bg-white text-[#6366f1] shadow-sm">
+                  <Filter className="w-5 h-5" />
                 </Button>
               </div>
             </div>
 
-            <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2">
-              {categories.map((cat, i) => (
+            <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2">
+              {categories.map((cat) => (
                 <Badge 
                   key={cat} 
-                  variant={i === 0 ? "default" : "secondary"}
+                  onClick={() => setSelectedCategory(cat)}
+                  variant={selectedCategory === cat ? "default" : "secondary"}
                   className={cn(
-                    "px-6 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap cursor-pointer transition-all",
-                    i === 0 ? "bg-[#6366f1] shadow-lg shadow-primary/20" : "bg-muted/30 hover:bg-muted/50"
+                    "px-8 py-3 rounded-xl font-black text-xs whitespace-nowrap cursor-pointer transition-all border-none",
+                    selectedCategory === cat ? "bg-[#6366f1] shadow-lg shadow-primary/20 scale-105" : "bg-muted/30 hover:bg-muted/50 text-muted-foreground"
                   )}
                 >
                   {cat}
                 </Badge>
               ))}
-              <Button variant="ghost" className="text-xs font-black gap-1 px-4 ml-auto">
-                More <ChevronDown className="w-4 h-4" />
-              </Button>
             </div>
           </div>
 
           <TabsContent value="works" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-black">All Jobs <span className="text-muted-foreground font-medium ml-1">({jobs?.length || 0})</span></h3>
-              <Button variant="ghost" className="text-xs font-black gap-1">
-                Latest <ChevronDown className="w-4 h-4" />
-              </Button>
+            <div className="flex items-center justify-between px-4">
+              <h3 className="text-2xl font-black tracking-tight">Active Jobs <span className="text-muted-foreground font-medium ml-2 text-lg">({filteredJobs.length})</span></h3>
+              <div className="flex items-center gap-2 text-xs font-black uppercase text-muted-foreground tracking-widest bg-white px-4 py-2 rounded-full border shadow-sm cursor-pointer hover:bg-muted/10">
+                Sort: Latest <ChevronDown className="w-3 h-3" />
+              </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="grid gap-6">
               {jobsLoading ? (
-                [1, 2, 3].map(i => <div key={i} className="h-40 bg-white rounded-[2rem] animate-pulse" />)
-              ) : jobs?.map((job) => (
-                <Card key={job.id} className="border-none shadow-sm rounded-[2rem] bg-white group hover:shadow-md transition-all">
-                  <CardContent className="p-8">
-                    <div className="flex flex-col md:flex-row gap-8">
-                      {/* Icon */}
-                      <div className="w-20 h-20 bg-indigo-50 text-[#6366f1] rounded-[1.5rem] flex items-center justify-center shrink-0">
-                        {job.title?.toLowerCase().includes('design') ? <LayoutGrid className="w-10 h-10" /> : <Briefcase className="w-10 h-10" />}
+                [1, 2, 3].map(i => <div key={i} className="h-44 bg-white rounded-[2.5rem] animate-pulse" />)
+              ) : filteredJobs.map((job) => (
+                <Card key={job.id} className="border-none shadow-sm rounded-[2.5rem] bg-white group hover:shadow-xl transition-all overflow-hidden border-l-8 border-l-transparent hover:border-l-primary">
+                  <CardContent className="p-8 md:p-10">
+                    <div className="flex flex-col md:flex-row gap-10">
+                      <div className="w-24 h-24 bg-indigo-50 text-[#6366f1] rounded-[2rem] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
+                        {job.title?.toLowerCase().includes('design') ? <LayoutGrid className="w-12 h-12" /> : <Briefcase className="w-12 h-12" />}
                       </div>
 
-                      {/* Content */}
-                      <div className="flex-1 space-y-4">
-                        <div className="flex justify-between items-start">
-                          <div className="space-y-1">
-                            <h4 className="text-2xl font-black group-hover:text-primary transition-colors">{job.title}</h4>
-                            <p className="text-sm font-bold text-muted-foreground">{job.type || 'Web Development'}</p>
+                      <div className="flex-1 space-y-6">
+                        <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+                          <div className="space-y-2">
+                            <h4 className="text-3xl font-black leading-tight group-hover:text-primary transition-colors">{job.title}</h4>
+                            <div className="flex items-center gap-4">
+                              <span className="text-sm font-bold text-muted-foreground flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {job.location || 'Remote'}</span>
+                              <span className="w-1.5 h-1.5 bg-muted rounded-full" />
+                              <span className="text-sm font-black text-emerald-600 uppercase tracking-widest">{job.type || 'Full-time'}</span>
+                            </div>
                           </div>
-                          <div className="text-right space-y-1">
-                            <div className="text-xl font-black text-green-600">{job.budget}</div>
-                            <div className="flex items-center gap-1 justify-end text-[10px] font-black text-muted-foreground uppercase tracking-wider">
-                              <MapPin className="w-3 h-3" /> {job.location || 'Remote'}
+                          <div className="flex flex-col items-end">
+                            <div className="text-3xl font-black text-[#111827]">{job.budget}</div>
+                            <div className="flex items-center gap-1.5 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-1">
+                              <Clock className="w-3 h-3" /> Posted 2h ago
                             </div>
                           </div>
                         </div>
 
-                        <p className="text-muted-foreground text-sm font-medium line-clamp-2 leading-relaxed">
-                          {job.description || "We are looking for a skilled professional to help us with this project. Requirements include attention to detail and ability to meet deadlines."}
+                        <p className="text-muted-foreground text-base font-medium line-clamp-2 leading-relaxed max-w-3xl">
+                          {job.description || "Looking for a seasoned professional to lead development on a new core module. Must be proficient in high-scale architectures."}
                         </p>
 
-                        <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+                        <div className="flex flex-wrap items-center justify-between gap-6 pt-4 border-t border-muted/20">
                           <div className="flex flex-wrap gap-2">
-                            <Badge variant="secondary" className="bg-green-50 text-green-600 rounded-lg px-3 py-1 text-[10px] font-black border-none uppercase">Full-time</Badge>
-                            <Badge variant="secondary" className="bg-purple-50 text-purple-600 rounded-lg px-3 py-1 text-[10px] font-black border-none uppercase">Intermediate</Badge>
+                            {(job.skills || ['React', 'Node.js', 'UI/UX']).map((skill: string) => (
+                              <Badge key={skill} variant="secondary" className="bg-muted/20 text-[#111827] rounded-xl px-4 py-1.5 text-[10px] font-black uppercase tracking-widest border-none">{skill}</Badge>
+                            ))}
                           </div>
-                          <div className="flex items-center gap-4">
-                            <span className="text-[10px] font-bold text-muted-foreground uppercase">2h ago</span>
-                            <Button variant="ghost" size="icon" className="rounded-xl">
-                              <Bookmark className="w-5 h-5 text-muted-foreground" />
+                          <div className="flex items-center gap-3 w-full md:w-auto">
+                            <Button 
+                              variant="outline" 
+                              size="icon" 
+                              className="rounded-xl w-14 h-14 border-muted-foreground/10 shadow-sm"
+                              onClick={() => handleSaveJob(job.id)}
+                            >
+                              <Bookmark className="w-6 h-6" />
                             </Button>
-                            <Button className="bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-xl px-8 font-black text-xs shadow-lg shadow-primary/10">
-                              Apply Now
+                            <Button 
+                              onClick={() => handleApply(job)}
+                              className="flex-1 md:flex-none bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-2xl h-14 px-10 font-black text-sm shadow-xl shadow-primary/20"
+                            >
+                              Quick Apply
                             </Button>
                           </div>
                         </div>
@@ -189,70 +270,121 @@ export default function JobsPage() {
                 </Card>
               ))}
 
-              <div className="flex justify-center pt-8">
-                <Button variant="ghost" className="font-black text-[#6366f1] gap-2 hover:bg-transparent">
-                  Load More Jobs <ChevronDown className="w-4 h-4" />
-                </Button>
-              </div>
+              {!jobsLoading && filteredJobs.length === 0 && (
+                <div className="text-center py-20 space-y-4">
+                  <div className="w-20 h-20 bg-muted/30 rounded-full flex items-center justify-center mx-auto">
+                    <Zap className="w-10 h-10 text-muted-foreground" />
+                  </div>
+                  <h4 className="text-xl font-black">No jobs match your search</h4>
+                  <p className="text-muted-foreground font-medium">Try adjusting your filters or keywords.</p>
+                </div>
+              )}
             </div>
           </TabsContent>
 
           <TabsContent value="workers" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-black">All Workers <span className="text-muted-foreground font-medium ml-1">({workers?.length || 0})</span></h3>
-              <Button variant="ghost" className="text-xs font-black gap-1">
-                Top Rated <ChevronDown className="w-4 h-4" />
-              </Button>
+            <div className="flex items-center justify-between px-4">
+              <h3 className="text-2xl font-black tracking-tight">Elite Workers <span className="text-muted-foreground font-medium ml-2 text-lg">({filteredWorkers.length})</span></h3>
+              <div className="flex items-center gap-2 text-xs font-black uppercase text-muted-foreground tracking-widest bg-white px-4 py-2 rounded-full border shadow-sm cursor-pointer">
+                Sort: Rating <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+              </div>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {workersLoading ? (
-                [1, 2, 3].map(i => <div key={i} className="h-64 bg-white rounded-[2rem] animate-pulse" />)
-              ) : workers?.map((worker) => (
-                <Card key={worker.id} className="border-none shadow-sm rounded-[2rem] bg-white group hover:shadow-md transition-all overflow-hidden">
-                  <CardContent className="p-6 space-y-6">
+                [1, 2, 3].map(i => <div key={i} className="h-72 bg-white rounded-[2.5rem] animate-pulse" />)
+              ) : filteredWorkers.map((worker) => (
+                <Card key={worker.id} className="border-none shadow-sm rounded-[3rem] bg-white group hover:shadow-2xl transition-all overflow-hidden relative border border-transparent hover:border-primary/10">
+                  <CardContent className="p-8 space-y-8">
                     <div className="flex items-start justify-between">
-                      <Avatar className="w-20 h-20 rounded-[1.5rem] border-4 border-muted/20">
-                        <AvatarImage src={worker.avatarUrl} />
-                        <AvatarFallback className="font-black text-xl">{worker.name?.[0]}</AvatarFallback>
-                      </Avatar>
-                      <div className="text-right">
-                        <div className="text-lg font-black text-[#6366f1]">$60 - $120/hr</div>
-                        <div className="flex items-center gap-1 justify-end text-sm font-bold">
+                      <div className="relative">
+                        <Avatar className="w-24 h-24 rounded-[2rem] ring-8 ring-[#F8F9FE] shadow-lg group-hover:scale-105 transition-transform">
+                          <AvatarImage src={worker.avatarUrl} />
+                          <AvatarFallback className="font-black text-2xl bg-primary/10 text-primary">{worker.name?.[0]}</AvatarFallback>
+                        </Avatar>
+                        {worker.rating >= 4.8 && (
+                          <div className="absolute -bottom-2 -right-2 bg-white rounded-2xl p-1.5 shadow-xl">
+                            <CheckCircle2 className="w-6 h-6 text-primary fill-primary/10" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-right space-y-1">
+                        <div className="text-2xl font-black text-primary">$60-120<span className="text-xs text-muted-foreground">/hr</span></div>
+                        <div className="flex items-center gap-1.5 justify-end text-sm font-black">
                           <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                           {worker.rating?.toFixed(1) || '5.0'}
-                          <span className="text-muted-foreground font-medium">({worker.reviewsCount || 0})</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="space-y-1">
-                      <h4 className="text-xl font-black group-hover:text-primary transition-colors">{worker.name}</h4>
-                      <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">{worker.role || 'Elite Professional'}</p>
+                    <div className="space-y-2">
+                      <h4 className="text-2xl font-black group-hover:text-primary transition-colors">{worker.name}</h4>
+                      <p className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">{worker.role || 'Elite Professional'}</p>
                     </div>
 
-                    <div className="flex flex-wrap gap-1.5">
-                      {(worker.skills || ['React', 'Design', 'UI/UX']).slice(0, 3).map((skill: string) => (
-                        <Badge key={skill} variant="secondary" className="bg-muted/30 text-[10px] font-bold rounded-lg px-2.5 py-1">
+                    <div className="flex flex-wrap gap-2">
+                      {(worker.skills || ['React', 'UI Design']).slice(0, 3).map((skill: string) => (
+                        <Badge key={skill} variant="secondary" className="bg-muted/30 text-[9px] font-black rounded-lg px-3 py-1.5 uppercase tracking-wider border-none">
                           {skill}
                         </Badge>
                       ))}
                     </div>
 
+                    <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest pt-2">
+                      <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {worker.location || 'Nepal'}</span>
+                      {worker.availabilityStatus === 'available' && (
+                        <span className="flex items-center gap-1.5 text-emerald-600">
+                          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          Ready
+                        </span>
+                      )}
+                    </div>
+
                     <div className="flex items-center gap-3 pt-2">
-                      <Button variant="outline" className="flex-1 rounded-xl font-black text-xs border-muted/50 h-11">
-                        View Profile
+                      <Button variant="outline" className="flex-1 rounded-2xl h-14 font-black text-sm border-muted-foreground/10 hover:bg-muted/5 transition-colors">
+                        Profile
                       </Button>
-                      <Button className="flex-1 bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-xl font-black text-xs h-11 shadow-lg shadow-primary/10">
+                      <Button 
+                        onClick={() => handleHire(worker.id)}
+                        className="flex-1 bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-2xl h-14 font-black text-sm shadow-xl shadow-primary/20"
+                      >
                         Hire Now
                       </Button>
                     </div>
                   </CardContent>
                 </Card>
               ))}
+
+              {!workersLoading && filteredWorkers.length === 0 && (
+                <div className="col-span-full text-center py-20">
+                  <p className="text-muted-foreground font-black uppercase tracking-widest">No matching workers found</p>
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Floating Recommendation Section */}
+        <section className="mt-20 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-[3rem] p-12 lg:p-20 text-white overflow-hidden relative">
+          <div className="relative z-10 grid lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8">
+              <Badge className="bg-white/20 text-white border-none px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-[0.2em]">Smart Matching</Badge>
+              <h2 className="text-5xl font-black leading-tight">Need a custom<br/>talent match?</h2>
+              <p className="text-xl text-white/80 font-medium leading-relaxed max-w-lg">Our AI-powered engine analyzes your profile and project requirements to find the perfect professional match in seconds.</p>
+              <Button className="bg-white text-primary hover:bg-white/90 rounded-2xl h-16 px-12 font-black text-lg shadow-2xl shadow-black/20 gap-3">
+                Try AI Matcher <ArrowRight className="w-6 h-6" />
+              </Button>
+            </div>
+            <div className="hidden lg:flex justify-end relative">
+               <div className="w-72 h-72 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-3xl">
+                  <TrendingUp className="w-32 h-32 opacity-40 rotate-12" />
+               </div>
+               <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-3xl" />
+            </div>
+          </div>
+          <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-white/5 rounded-full blur-[100px]" />
+        </section>
+
       </div>
     </div>
   );

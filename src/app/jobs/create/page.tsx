@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Briefcase, DollarSign, MapPin, Sparkles } from 'lucide-react';
+import { Loader2, Briefcase, DollarSign, MapPin, Sparkles, Plus } from 'lucide-react';
 import { generateJobDescription } from '@/ai/flows/generate-job-description-flow';
 
 export default function CreateJobPage() {
@@ -110,16 +110,15 @@ export default function CreateJobPage() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center px-1">
                   <Label className="text-xs font-black uppercase tracking-widest">Description</Label>
-                  <Button 
+                  <button 
                     type="button" 
-                    variant="ghost" 
                     onClick={handleAICompose}
                     disabled={isGenerating}
-                    className="h-8 text-[10px] font-black uppercase tracking-widest text-primary gap-1"
+                    className="h-8 text-[10px] font-black uppercase tracking-widest text-primary gap-1 flex items-center hover:opacity-80 transition-opacity disabled:opacity-50"
                   >
                     {isGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
                     AI Compose
-                  </Button>
+                  </button>
                 </div>
                 <Textarea 
                   value={formData.description}

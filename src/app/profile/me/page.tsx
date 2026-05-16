@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@/firebase';
+import { useUser, useDoc, useFirestore } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,22 +18,35 @@ import {
   PieChart,
   Atom,
   ChevronRight,
-  Github
+  Github,
+  Loader2
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { doc } from 'firebase/firestore';
+import { useMemoFirebase } from '@/firebase/use-memo-firebase';
 
 export default function ProfilePage() {
-  const { user } = useUser();
+  const { user, loading: authLoading } = useUser();
+  const db = useFirestore();
   const [mounted, setMounted] = useState(false);
+
+  const GITHUB_REPO = "https://github.com/theastralregulator/Project-QUUB";
+
+  const userRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return doc(db, 'users', user.uid);
+  }, [db, user]);
+
+  const { data: profileData, loading: profileLoading } = useDoc(userRef);
 
   useEffect(() => {
     setMounted(true);
   }, []);
   
   const stats = [
-    { label: "Member Since", value: "June 2023", icon: Calendar, color: "text-purple-600 bg-purple-50" },
+    { label: "Member Since", value: profileData?.createdAt ? new Date(profileData.createdAt.seconds * 1000).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "June 2023", icon: Calendar, color: "text-purple-600 bg-purple-50" },
     { label: "Job Success Rate", value: "98%", icon: TrendingUp, color: "text-green-600 bg-green-50" },
     { label: "Total Earned", value: "NPR 1,250,000+", icon: Wallet, color: "text-indigo-600 bg-indigo-50" },
     { label: "Jobs Completed", value: "115", icon: CheckCircle2, color: "text-emerald-600 bg-emerald-50" },
@@ -61,9 +74,15 @@ export default function ProfilePage() {
     { name: "Aakash R.", time: "2 date ago", rating: 5, text: "Great to hear that. Can your time so xrm and great I visibility from your reviews!" }
   ];
 
-  const skills = ["React", "Node.js", "JavaScript", "MongoDB", "UI/UX Design", "Mobile Design", "Frotnet & Analytics"];
+  const skills = profileData?.skills?.length ? profileData.skills : ["React", "Node.js", "JavaScript", "MongoDB", "UI/UX Design", "Mobile Design", "Frotnet & Analytics"];
 
-  if (!mounted) return null;
+  if (!mounted || authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F8F9FE]">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8F9FE] pb-24 lg:pb-12 pt-8">
@@ -77,9 +96,11 @@ export default function ProfilePage() {
             <Button variant="outline" className="rounded-xl h-12 px-6 font-black text-sm border-muted-foreground/20 bg-white">
               Edit Profile
             </Button>
-            <Button className="bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-xl h-12 px-6 font-black text-sm shadow-xl shadow-primary/20">
-              <Plus className="w-4 h-4 mr-2" /> Post a Job
-            </Button>
+            <Link href="/jobs/create">
+              <Button className="bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-xl h-12 px-6 font-black text-sm shadow-xl shadow-primary/20">
+                <Plus className="w-4 h-4 mr-2" /> Post a Job
+              </Button>
+            </Link>
           </div>
         </div>
 
@@ -97,17 +118,17 @@ export default function ProfilePage() {
 
             <div className="relative mb-6">
               <Avatar className="w-32 h-32 rounded-full border-8 border-white shadow-2xl">
-                <AvatarImage src={user?.photoURL || `https://picsum.photos/seed/${user?.uid || 'aman'}/400`} />
-                <AvatarFallback className="text-3xl font-black">{user?.displayName?.[0] || 'A'}</AvatarFallback>
+                <AvatarImage src={profileData?.avatarUrl || user?.photoURL || `https://picsum.photos/seed/${user?.uid || 'aman'}/400`} />
+                <AvatarFallback className="text-3xl font-black">{profileData?.name?.[0] || user?.displayName?.[0] || 'A'}</AvatarFallback>
               </Avatar>
             </div>
             
             <div className="space-y-3 mb-8">
-              <h2 className="text-4xl font-black tracking-tight text-[#111827]">{user?.displayName || "Aman Sharma"}</h2>
-              <p className="text-lg font-bold text-[#6B7280]">Full Stack Developer</p>
+              <h2 className="text-4xl font-black tracking-tight text-[#111827]">{profileData?.name || user?.displayName || "Member"}</h2>
+              <p className="text-lg font-bold text-[#6B7280]">{profileData?.bio || "Professional Member"}</p>
               <div className="flex items-center justify-center gap-3">
                 <Badge variant="secondary" className="bg-[#EBEFFF] text-[#6366f1] font-black px-5 py-1.5 rounded-full text-[10px] uppercase tracking-widest border-none">Premium Member</Badge>
-                <Link href="https://github.com" target="_blank">
+                <Link href={profileData?.githubUrl || GITHUB_REPO} target="_blank">
                   <Button variant="outline" size="sm" className="rounded-full h-8 px-4 gap-2 border-muted-foreground/10 bg-white text-xs font-black uppercase tracking-widest hover:bg-muted/5">
                     <Github className="w-3.5 h-3.5" /> GitHub
                   </Button>
@@ -121,7 +142,7 @@ export default function ProfilePage() {
                 <CheckCircle2 className="w-4 h-4 text-[#6366f1]" />
               </div>
               <div className="flex flex-wrap justify-center gap-2">
-                {skills.map((skill, i) => (
+                {skills.map((skill: string, i: number) => (
                   <Badge key={i} variant="secondary" className="bg-white border-none text-[#111827] font-black px-5 py-2.5 rounded-xl text-[11px] gap-2 shadow-sm">
                     {skill}
                     <CheckCircle2 className="w-3.5 h-3.5 text-[#6366f1] fill-[#6366f1]/10" />

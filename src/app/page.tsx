@@ -26,6 +26,8 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { cn } from '@/lib/utils';
 
 export default function LandingPage() {
+  const GITHUB_REPO = "https://github.com/theastralregulator/Project-QUUB";
+
   const mockups = [
     PlaceHolderImages.find(img => img.id === 'hero-mockup-1'),
     PlaceHolderImages.find(img => img.id === 'hero-mockup-2'),
@@ -226,7 +228,9 @@ export default function LandingPage() {
                 <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Instagram className="w-4 h-4" /></Button>
                 <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Twitter className="w-4 h-4" /></Button>
                 <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Linkedin className="w-4 h-4" /></Button>
-                <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Github className="w-4 h-4" /></Button>
+                <Link href={GITHUB_REPO} target="_blank">
+                  <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Github className="w-4 h-4" /></Button>
+                </Link>
               </div>
             </div>
             <div>

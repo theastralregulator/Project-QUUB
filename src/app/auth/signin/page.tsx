@@ -6,11 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Mail, Lock, LogIn, Phone } from 'lucide-react';
+import { Loader2, Mail, Lock, LogIn, Phone, Github } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/firebase';
 import { 
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GithubAuthProvider,
+  GoogleAuthProvider
 } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -55,6 +58,25 @@ export default function SignInPage() {
     }
   };
 
+  const handleGithubSignIn = async () => {
+    if (!auth) return;
+    setLoading(true);
+    const provider = new GithubAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      toast({ title: "Welcome!", description: "Signed in with GitHub." });
+      router.push('/dashboard');
+    } catch (error: any) {
+      toast({ 
+        variant: "destructive", 
+        title: "GitHub Auth Failed", 
+        description: error.message 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 bg-muted/20">
       <Card className="w-full max-w-xl rounded-[2.5rem] border-none shadow-2xl bg-white overflow-hidden animate-in fade-in zoom-in-95 duration-500">
@@ -71,6 +93,22 @@ export default function SignInPage() {
         </CardHeader>
 
         <CardContent className="p-10 pt-8 space-y-8">
+          <div className="grid grid-cols-1 gap-4">
+            <Button 
+              variant="outline" 
+              onClick={handleGithubSignIn}
+              disabled={loading}
+              className="h-14 rounded-2xl font-black border-muted-foreground/10 gap-3"
+            >
+              <Github className="w-5 h-5" /> Continue with GitHub
+            </Button>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+            <div className="relative flex justify-center text-[10px] uppercase"><span className="bg-white px-4 text-muted-foreground font-black tracking-widest">or continue with email</span></div>
+          </div>
+
           <div className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-xs font-black uppercase tracking-widest ml-1">Email Address</Label>
@@ -83,21 +121,6 @@ export default function SignInPage() {
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
                   placeholder="name@example.com" 
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone" className="text-xs font-black uppercase tracking-widest ml-1">Phone Number (Optional)</Label>
-              <div className="relative">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input 
-                  id="phone" 
-                  type="tel" 
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
-                  placeholder="+1 (555) 000-0000" 
                 />
               </div>
             </div>
@@ -129,11 +152,6 @@ export default function SignInPage() {
                 {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Sign In"}
               </Button>
             </div>
-          </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-            <div className="relative flex justify-center text-[10px] uppercase"><span className="bg-white px-4 text-muted-foreground font-black tracking-widest">Secure Access</span></div>
           </div>
 
           <p className="text-center text-sm text-muted-foreground">

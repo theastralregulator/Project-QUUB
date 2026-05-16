@@ -14,6 +14,7 @@
         "userType": { "type": "string", "enum": ["worker", "employer", "both"] },
         "location": { "type": "string" },
         "avatarUrl": { "type": "string" },
+        "githubUrl": { "type": "string" },
         "rating": { "type": "number" },
         "reviewsCount": { "type": "number" },
         "availabilityStatus": { "type": "string", "enum": ["available", "busy"] },
@@ -34,6 +35,7 @@
         "postedBy": { "type": "string" },
         "employerName": { "type": "string" },
         "location": { "type": "string" },
+        "category": { "type": "string" },
         "type": { "type": "string", "enum": ["remote", "onsite", "hybrid"] },
         "isUrgent": { "type": "boolean" },
         "createdAt": { "type": "string", "format": "date-time" }
@@ -42,7 +44,7 @@
     }
   },
   "auth": {
-    "providers": ["email", "google"]
+    "providers": ["email", "google", "github"]
   },
   "firestore": {
     "/users/{userId}": {

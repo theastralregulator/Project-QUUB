@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useUser, useFirestore, useCollection } from '@/firebase';
@@ -153,49 +154,6 @@ export default function DashboardPage() {
 
           {/* Sidebar Area */}
           <div className="lg:col-span-4 space-y-8">
-            {/* Profile Card */}
-            <Card className="border-none shadow-sm rounded-[2.5rem] bg-white overflow-hidden">
-              <CardContent className="p-8 space-y-6">
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="w-20 h-20 bg-primary/10 rounded-[1.5rem] flex items-center justify-center">
-                    <User className="w-10 h-10 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-black text-xl">{user.displayName || 'Quuber User'}</h3>
-                    <p className="text-xs font-bold text-muted-foreground">Frontend Developer</p>
-                    <Badge variant="secondary" className="mt-2 bg-purple-50 text-purple-600 border-none font-bold text-[10px]">Premium Member</Badge>
-                  </div>
-                </div>
-
-                <div className="space-y-3 pt-4 border-t border-muted/50">
-                   <div className="flex items-center justify-between group cursor-pointer p-2 rounded-2xl hover:bg-muted/30 transition-colors">
-                     <div className="flex items-center gap-3">
-                       <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
-                         <Star className="w-5 h-5" />
-                       </div>
-                       <div className="text-left">
-                         <p className="text-[10px] font-bold text-muted-foreground uppercase">Wallet Balance</p>
-                         <p className="text-sm font-black">NPR 2,450</p>
-                       </div>
-                     </div>
-                     <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                   </div>
-                   <div className="flex items-center justify-between group cursor-pointer p-2 rounded-2xl hover:bg-muted/30 transition-colors">
-                     <div className="flex items-center gap-3">
-                       <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center">
-                         <Zap className="w-5 h-5" />
-                       </div>
-                       <div className="text-left">
-                         <p className="text-[10px] font-bold text-muted-foreground uppercase">Account Type</p>
-                         <p className="text-sm font-black">Freelancer</p>
-                       </div>
-                     </div>
-                     <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                   </div>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Overview Stats Grid */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">

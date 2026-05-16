@@ -25,22 +25,20 @@ import {
   Flame,
   ArrowUpRight,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  ArrowRight
 } from 'lucide-react';
 import { collection, query, limit, orderBy, where, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useMemoFirebase } from '@/firebase/use-memo-firebase';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
   ChartContainer, 
   ChartTooltip, 
   ChartTooltipContent, 
   type ChartConfig 
 } from '@/components/ui/chart';
-import { Cell } from 'recharts';
+import { BarChart, Bar, XAxis, Cell } from 'recharts';
 import { recommendRecommendations, type RecommendationOutput } from '@/ai/flows/recommendation-flow';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -70,7 +68,7 @@ export default function DashboardPage() {
     else setGreeting('Good Evening');
 
     // Load saved location from local storage
-    const savedLoc = localStorage.getItem('quub_location');
+    const savedLoc = typeof window !== 'undefined' ? localStorage.getItem('quub_location') : null;
     if (savedLoc) setLocation(savedLoc);
   }, []);
 

@@ -1,15 +1,19 @@
+
 "use client"
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/firebase';
-import { Bell, MapPin, ChevronDown } from 'lucide-react';
+import { Bell, MapPin, ChevronDown, Search } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 export function Navbar() {
   const { user } = useUser();
+  const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-muted/10 hidden md:block">
+    <header className="sticky top-0 z-50 w-full bg-white border-b border-muted/10 hidden md:block">
       <div className="container mx-auto px-4 flex h-20 items-center justify-between">
         {/* Logo Section */}
         <Link href="/" className="flex items-center gap-3 group">
@@ -21,8 +25,17 @@ export function Navbar() {
 
         {/* Dynamic Nav Content */}
         {user ? (
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center gap-8">
+            <nav className="flex items-center gap-6">
+              <Link href="/dashboard" className={cn("text-sm font-black transition-colors", pathname === '/dashboard' ? "text-[#6366f1]" : "text-muted-foreground hover:text-foreground")}>Dashboard</Link>
+              <Link href="/jobs" className={cn("text-sm font-black transition-colors", pathname === '/jobs' ? "text-[#6366f1]" : "text-muted-foreground hover:text-foreground")}>Jobs</Link>
+              <Link href="/messages" className={cn("text-sm font-black transition-colors", pathname === '/messages' ? "text-[#6366f1]" : "text-muted-foreground hover:text-foreground")}>Messages</Link>
+            </nav>
+
+            <div className="flex items-center gap-4 border-l pl-8">
+              <Button variant="ghost" size="icon" className="rounded-2xl relative bg-muted/30 hover:bg-muted/50 w-11 h-11">
+                <Search className="w-5 h-5 text-muted-foreground" />
+              </Button>
               <Button variant="ghost" size="icon" className="rounded-2xl relative bg-muted/30 hover:bg-muted/50 w-11 h-11">
                 <Bell className="w-5 h-5 text-muted-foreground" />
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#6366f1] text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white font-black">3</span>

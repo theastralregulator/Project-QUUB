@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,29 +32,53 @@ export default function SignUpPage() {
   });
   const [otp, setOtp] = useState('');
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
-  const recaptchaWrapperRef = useRef<HTMLDivElement>(null);
 
   const auth = useAuth();
   const db = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
 
+  // Clean up global verifier on mount/unmount to prevent conflicts
   useEffect(() => {
-    if (typeof window !== 'undefined' && auth && !window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible',
-        callback: () => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
-        }
-      });
+    if (typeof window !== 'undefined' && window.recaptchaVerifier) {
+      try {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      } catch (e) {
+        console.error("Error clearing verifier:", e);
+      }
     }
-  }, [auth]);
+    return () => {
+      if (typeof window !== 'undefined' && window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+    };
+  }, []);
 
   const handleSendOtp = async () => {
     if (!auth || !formData.phone) return;
+    
+    // Basic phone validation (must start with + and be long enough)
+    if (!formData.phone.startsWith('+')) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Phone Format",
+        description: "Please include the country code (e.g., +1...)"
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // Initialize verifier on demand to ensure the container is present
+      if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'invisible'
+        });
+      }
+
       const appVerifier = window.recaptchaVerifier;
       const result = await signInWithPhoneNumber(auth, formData.phone, appVerifier);
       setConfirmationResult(result);
@@ -64,11 +88,17 @@ export default function SignUpPage() {
         description: `A verification code has been sent to ${formData.phone}`,
       });
     } catch (error: any) {
+      console.error("OTP Error:", error);
       toast({
         variant: "destructive",
         title: "Failed to send OTP",
-        description: error.message
+        description: error.message || "Something went wrong. Please check your phone number and try again."
       });
+      // Reset verifier on error
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
     } finally {
       setLoading(false);
     }
@@ -79,8 +109,7 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      // 1. Verify OTP first (or skip if only email signup is intended, 
-      // but the prompt asks for OTP verification in signup)
+      // 1. Verify OTP
       await confirmationResult.confirm(otp);
 
       // 2. Create Email/Password account

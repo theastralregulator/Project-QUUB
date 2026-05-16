@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,12 +35,20 @@ export default function SignInPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && auth && !window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-signin-container', {
-        size: 'invisible',
-      });
+    // Clear any existing verifier on mount to prevent container ID conflicts
+    if (typeof window !== 'undefined' && window.recaptchaVerifier) {
+      try {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      } catch (e) {}
     }
-  }, [auth]);
+    return () => {
+      if (typeof window !== 'undefined' && window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+    };
+  }, []);
 
   const handleEmailSignIn = async () => {
     if (!auth) return;
@@ -57,15 +66,36 @@ export default function SignInPage() {
 
   const handleSendOtp = async () => {
     if (!auth || !formData.phone) return;
+    
+    if (!formData.phone.startsWith('+')) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Phone Format",
+        description: "Please include the country code (e.g., +1...)"
+      });
+      return;
+    }
+
     setLoading(true);
     try {
+      if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-signin-container', {
+          size: 'invisible',
+        });
+      }
+      
       const appVerifier = window.recaptchaVerifier;
       const result = await signInWithPhoneNumber(auth, formData.phone, appVerifier);
       setConfirmationResult(result);
       setStep('otp');
       toast({ title: "OTP Sent", description: "Verification code sent to your phone." });
     } catch (error: any) {
+      console.error("Sign-in OTP Error:", error);
       toast({ variant: "destructive", title: "Failed to send OTP", description: error.message });
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
     } finally {
       setLoading(false);
     }
@@ -224,10 +254,4 @@ export default function SignInPage() {
       </Card>
     </div>
   );
-}
-
-declare global {
-  interface Window {
-    recaptchaVerifier: any;
-  }
 }

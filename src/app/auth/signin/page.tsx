@@ -29,13 +29,27 @@ export default function SignInPage() {
 
   const handleEmailSignIn = async () => {
     if (!auth) return;
+    
+    if (!formData.email || !formData.password) {
+      toast({
+        variant: "destructive",
+        title: "Missing Information",
+        description: "Please enter your email and password.",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
       toast({ title: "Welcome back!", description: "Successfully signed in." });
       router.push('/dashboard');
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Sign in failed", description: error.message });
+      toast({ 
+        variant: "destructive", 
+        title: "Sign in failed", 
+        description: error.message || "Invalid email or password." 
+      });
     } finally {
       setLoading(false);
     }

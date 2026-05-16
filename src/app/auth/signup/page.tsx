@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, Mail, Lock, User, Phone } from 'lucide-react';
 import Link from 'next/link';
-import { useAuth, useFirestore } from '@/firebase';
+import { useAuth, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { 
   createUserWithEmailAndPassword, 
   updateProfile
@@ -33,25 +33,35 @@ export default function SignUpPage() {
   const { toast } = useToast();
 
   const handleSignUp = async () => {
-    if (!auth || !db || !formData.email || !formData.password || !formData.fname) return;
+    if (!auth || !db) return;
+    
+    if (!formData.email || !formData.password || !formData.fname) {
+      toast({
+        variant: "destructive",
+        title: "Missing Information",
+        description: "Please fill in all required fields (Name, Email, and Password).",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
       // 1. Create Email/Password account
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
-      const fullName = `${formData.fname} ${formData.lname}`;
+      const fullName = `${formData.fname} ${formData.lname}`.trim();
 
       // 2. Update Firebase Auth profile
       await updateProfile(user, {
         displayName: fullName
       });
 
-      // 3. Save User Profile to Firestore
-      setDoc(doc(db, 'users', user.uid), {
+      // 3. Save User Profile to Firestore (Non-blocking as per guidelines)
+      const userProfileData = {
         name: fullName,
         email: formData.email,
-        phone: formData.phone,
+        phone: formData.phone || '',
         userType: 'both',
         skills: [],
         bio: '',
@@ -61,11 +71,22 @@ export default function SignUpPage() {
         reviewsCount: 0,
         availabilityStatus: 'available',
         createdAt: serverTimestamp()
-      });
+      };
+
+      const userRef = doc(db, 'users', user.uid);
+      setDoc(userRef, userProfileData)
+        .catch(async (serverError) => {
+          const permissionError = new FirestorePermissionError({
+            path: userRef.path,
+            operation: 'create',
+            requestResourceData: userProfileData,
+          });
+          errorEmitter.emit('permission-error', permissionError);
+        });
 
       toast({
         title: "Account Created",
-        description: "Welcome to Quub! Your account has been created successfully.",
+        description: `Welcome to Quub, ${formData.fname}!`,
       });
 
       router.push('/dashboard');
@@ -73,7 +94,7 @@ export default function SignUpPage() {
       toast({
         variant: "destructive",
         title: "Sign up failed",
-        description: error.message
+        description: error.message || "An unexpected error occurred during sign up."
       });
     } finally {
       setLoading(false);
@@ -136,7 +157,7 @@ export default function SignUpPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-xs font-black uppercase tracking-widest ml-1">Phone Number</Label>
+              <Label htmlFor="phone" className="text-xs font-black uppercase tracking-widest ml-1">Phone Number (Optional)</Label>
               <div className="relative">
                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input 
@@ -168,7 +189,7 @@ export default function SignUpPage() {
             <div className="pt-6">
               <Button 
                 onClick={handleSignUp}
-                disabled={loading || !formData.email || !formData.password || !formData.fname}
+                disabled={loading}
                 className="w-full h-16 rounded-[1.25rem] font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform"
               >
                 {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Create Account"}

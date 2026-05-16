@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from 'react';
@@ -5,14 +6,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Mail, Lock, User, Phone, AlertCircle } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Phone, AlertCircle, Github } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { 
   createUserWithEmailAndPassword, 
-  updateProfile
+  updateProfile,
+  signInWithPopup,
+  GithubAuthProvider
 } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -33,6 +36,46 @@ export default function SignUpPage() {
   const router = useRouter();
   const { toast } = useToast();
 
+  const handleGithubSignUp = async () => {
+    if (!auth || !db) return;
+    setLoading(true);
+    const provider = new GithubAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Check if profile exists
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        const userProfileData = {
+          name: user.displayName || 'GitHub User',
+          email: user.email || '',
+          phone: '',
+          userType: 'both',
+          skills: [],
+          bio: '',
+          location: 'Remote',
+          avatarUrl: user.photoURL || `https://picsum.photos/seed/${user.uid}/200`,
+          githubUrl: `https://github.com/${(user as any).reloadUserInfo?.screenName || ''}`,
+          rating: 5.0,
+          reviewsCount: 0,
+          availabilityStatus: 'available',
+          createdAt: serverTimestamp()
+        };
+        await setDoc(userRef, userProfileData);
+      }
+
+      toast({ title: "Welcome!", description: "Successfully signed up with GitHub." });
+      router.push('/dashboard');
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "GitHub Auth Failed", description: error.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSignUp = async () => {
     if (!auth || !db) return;
     setAuthError(null);
@@ -49,17 +92,14 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      // 1. Create Email/Password account
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
       const fullName = `${formData.fname} ${formData.lname}`.trim();
 
-      // 2. Update Firebase Auth profile
       await updateProfile(user, {
         displayName: fullName
       });
 
-      // 3. Save User Profile to Firestore
       const userProfileData = {
         name: fullName,
         email: formData.email,
@@ -69,6 +109,7 @@ export default function SignUpPage() {
         bio: '',
         location: 'Remote',
         avatarUrl: `https://picsum.photos/seed/${user.uid}/200`,
+        githubUrl: '',
         rating: 5.0,
         reviewsCount: 0,
         availabilityStatus: 'available',
@@ -86,23 +127,13 @@ export default function SignUpPage() {
           errorEmitter.emit('permission-error', permissionError);
         });
 
-      toast({
-        title: "Account Created",
-        description: `Welcome to Quub, ${formData.fname}!`,
-      });
-
+      toast({ title: "Account Created", description: `Welcome to Quub, ${formData.fname}!` });
       router.push('/dashboard');
     } catch (error: any) {
-      console.error("Sign up error:", error);
-      
       if (error.code === 'auth/configuration-not-found') {
-        setAuthError("Email/Password provider is not enabled in your Firebase Console. Please go to Authentication > Sign-in method and enable it.");
+        setAuthError("Email/Password provider is not enabled in your Firebase Console.");
       } else {
-        toast({
-          variant: "destructive",
-          title: "Sign up failed",
-          description: error.message || "An unexpected error occurred during sign up."
-        });
+        toast({ variant: "destructive", title: "Sign up failed", description: error.message });
       }
     } finally {
       setLoading(false);
@@ -126,11 +157,25 @@ export default function SignUpPage() {
             <Alert variant="destructive" className="rounded-2xl border-destructive/50">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Configuration Required</AlertTitle>
-              <AlertDescription>
-                {authError}
-              </AlertDescription>
+              <AlertDescription>{authError}</AlertDescription>
             </Alert>
           )}
+
+          <div className="grid grid-cols-1 gap-4">
+            <Button 
+              variant="outline" 
+              onClick={handleGithubSignUp}
+              disabled={loading}
+              className="h-14 rounded-2xl font-black border-muted-foreground/10 gap-3 hover:bg-muted/5 transition-colors"
+            >
+              <Github className="w-5 h-5" /> Continue with GitHub
+            </Button>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+            <div className="relative flex justify-center text-[10px] uppercase"><span className="bg-white px-4 text-muted-foreground font-black tracking-widest">or continue with email</span></div>
+          </div>
 
           <div className="space-y-5">
             <div className="grid md:grid-cols-2 gap-4">
@@ -175,21 +220,6 @@ export default function SignUpPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-xs font-black uppercase tracking-widest ml-1">Phone Number (Optional)</Label>
-              <div className="relative">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input 
-                  id="phone" 
-                  type="tel" 
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
-                  placeholder="+1 (555) 000-0000" 
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="pass" className="text-xs font-black uppercase tracking-widest ml-1">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -213,11 +243,6 @@ export default function SignUpPage() {
                 {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Create Account"}
               </Button>
             </div>
-          </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-            <div className="relative flex justify-center text-[10px] uppercase"><span className="bg-white px-4 text-muted-foreground font-black tracking-widest">Secure Signup</span></div>
           </div>
 
           <p className="text-center text-sm text-muted-foreground">

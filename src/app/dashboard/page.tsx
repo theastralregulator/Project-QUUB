@@ -184,15 +184,6 @@ export default function DashboardPage() {
             <Card className="border-none shadow-sm rounded-3xl bg-white">
               <CardContent className="p-8 space-y-6">
                 <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="relative">
-                    <Avatar className="w-24 h-24 rounded-3xl border-4 border-[#F8F9FE] shadow-lg">
-                      <AvatarImage src={user.photoURL || `https://picsum.photos/seed/${user.uid}/200`} />
-                      <AvatarFallback className="bg-primary text-white font-black text-2xl">{user.displayName?.[0] || 'Q'}</AvatarFallback>
-                    </Avatar>
-                    <div className="absolute -bottom-1 -right-1 bg-white p-1 rounded-full shadow-sm">
-                      <div className="w-5 h-5 bg-green-500 rounded-full border-2 border-white" />
-                    </div>
-                  </div>
                   <div>
                     <h3 className="font-black text-xl">{user.displayName || 'Quuber User'}</h3>
                     <p className="text-xs font-bold text-muted-foreground">Frontend Developer</p>

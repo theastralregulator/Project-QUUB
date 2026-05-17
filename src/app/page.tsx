@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -227,8 +228,10 @@ export default function LandingPage() {
           <div className="grid lg:grid-cols-12 gap-20 mb-24">
             <div className="lg:col-span-5 space-y-10">
               <Link href="/" className="flex items-center gap-4 group">
-                <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-xl shadow-primary/20">
-                  <span className="text-white text-2xl font-headline font-black italic">Q</span>
+                <div className="w-12 h-12 group-hover:scale-105 transition-transform shrink-0">
+                  <svg viewBox="0 0 100 100" className="w-full h-full text-[#6366f1] drop-shadow-xl" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fillRule="evenodd" clipRule="evenodd" d="M20 0C8.9543 0 0 8.9543 0 20V70C0 81.0457 8.9543 90 20 90H58L65 100H82L75 90H80C91.0457 90 100 81.0457 100 70V20C100 8.9543 91.0457 0 80 0H20ZM25 25H75V65H25V25Z" />
+                  </svg>
                 </div>
                 <span className="text-4xl font-headline font-black text-[#111827] tracking-tighter">Quub</span>
               </Link>

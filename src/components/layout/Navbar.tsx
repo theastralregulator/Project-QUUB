@@ -94,8 +94,10 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-muted/10 hidden md:block">
       <div className="container mx-auto px-4 flex h-20 items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 bg-[#6366f1] rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
-            <span className="text-white text-xl font-headline font-black italic -ml-0.5">Q</span>
+          <div className="w-10 h-10 group-hover:scale-105 transition-transform shrink-0">
+            <svg viewBox="0 0 100 100" className="w-full h-full text-[#6366f1] drop-shadow-md" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path fillRule="evenodd" clipRule="evenodd" d="M20 0C8.9543 0 0 8.9543 0 20V70C0 81.0457 8.9543 90 20 90H58L65 100H82L75 90H80C91.0457 90 100 81.0457 100 70V20C100 8.9543 91.0457 0 80 0H20ZM25 25H75V65H25V25Z" />
+            </svg>
           </div>
           <span className="text-2xl font-headline font-black text-[#111827] tracking-tight">Quub</span>
         </Link>

@@ -17,7 +17,6 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Separator } from '@/components/ui/separator';
 
 export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
@@ -64,6 +63,9 @@ export default function SignUpPage() {
         email: formData.email,
         phone: formData.phone || '',
         userType: 'both',
+        role: 'user', // Default role
+        isVerified: false,
+        isBanned: false,
         skills: [],
         bio: '',
         location: 'Remote',

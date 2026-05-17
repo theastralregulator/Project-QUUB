@@ -4,8 +4,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { useUser } from '@/firebase';
-import { Bell, MapPin, ChevronDown, Search, Navigation } from 'lucide-react';
+import { useUser, useFirestore, useDoc } from '@/firebase';
+import { Bell, MapPin, ChevronDown, Search, Navigation, ShieldAlert } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
@@ -15,16 +15,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { doc } from 'firebase/firestore';
+import { useMemoFirebase } from '@/firebase/use-memo-firebase';
 
 export function Navbar() {
   const { user } = useUser();
+  const db = useFirestore();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [location, setLocation] = useState<string>('Remote');
 
+  // Fetch current user's profile to check role for admin link
+  const profileRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return doc(db, 'users', user.uid);
+  }, [db, user]);
+
+  const { data: profile } = useDoc(profileRef);
+
   useEffect(() => {
     setMounted(true);
     const checkLocation = () => {
+      if (typeof window === 'undefined') return;
       const loc = localStorage.getItem('quub_location') || 'Remote';
       if (loc !== location) setLocation(loc);
     };
@@ -70,6 +82,11 @@ export function Navbar() {
                 <Link href="/dashboard" className={cn("text-sm font-black transition-colors uppercase tracking-widest", pathname === '/dashboard' ? "text-[#6366f1]" : "text-muted-foreground hover:text-foreground")}>Dashboard</Link>
                 <Link href="/jobs" className={cn("text-sm font-black transition-colors uppercase tracking-widest", pathname === '/jobs' ? "text-[#6366f1]" : "text-muted-foreground hover:text-foreground")}>Jobs Hub</Link>
                 <Link href="/messages" className={cn("text-sm font-black transition-colors uppercase tracking-widest", pathname === '/messages' ? "text-[#6366f1]" : "text-muted-foreground hover:text-foreground")}>Messages</Link>
+                {profile?.role === 'admin' && (
+                  <Link href="/admin" className={cn("text-sm font-black transition-colors uppercase tracking-widest flex items-center gap-1", pathname === '/admin' ? "text-orange-600" : "text-orange-500 hover:text-orange-600")}>
+                    <ShieldAlert className="w-4 h-4" /> Admin
+                  </Link>
+                )}
               </nav>
 
               <div className="flex items-center gap-4 border-l pl-8 border-muted-foreground/10">
@@ -88,7 +105,7 @@ export function Navbar() {
                         <MapPin className="w-4 h-4 text-primary" />
                       </div>
                       <div className="flex flex-col text-left">
-                        <span className="text-[9px] font-black uppercase text-muted-foreground tracking-[0.2em] leading-none mb-1">Your Location</span>
+                        <span className="text-[9px] font-black uppercase text-muted-foreground tracking-[0.2em] leading-none mb-1">Location</span>
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-black text-[#111827]">{location}</span>
                           <ChevronDown className="w-4 h-4 text-muted-foreground" />

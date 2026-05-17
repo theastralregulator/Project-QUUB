@@ -32,6 +32,13 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function JobsPage() {
   const { user } = useUser();
@@ -43,18 +50,19 @@ export default function JobsPage() {
   const [activeTab, setActiveTab] = useState('works');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [currentLocation, setCurrentLocation] = useState('Kerala');
 
   useEffect(() => {
     setMounted(true);
+    const savedLoc = localStorage.getItem('quub_location');
+    if (savedLoc) setCurrentLocation(savedLoc);
   }, []);
 
-  // Queries for Works (Jobs)
   const jobsQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, 'jobs'), orderBy('createdAt', 'desc'), limit(50));
   }, [db]);
 
-  // Queries for Workers (Users with worker role)
   const workersQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, 'users'), where('userType', 'in', ['worker', 'both']), limit(30));
@@ -62,6 +70,12 @@ export default function JobsPage() {
 
   const { data: rawJobs, loading: jobsLoading } = useCollection(jobsQuery);
   const { data: rawWorkers, loading: workersLoading } = useCollection(workersQuery);
+
+  const keralaLocations = [
+    "Kochi", "Trivandrum", "Kozhikode", "Thrissur", "Kollam", 
+    "Alappuzha", "Palakkad", "Malappuram", "Kannur", "Kottayam", 
+    "Idukki", "Wayanad", "Pathanamthitta", "Kasaragod", "Remote"
+  ];
 
   const filteredJobs = useMemo(() => {
     if (!rawJobs) return [];
@@ -72,19 +86,22 @@ export default function JobsPage() {
       const matchesCategory = selectedCategory === 'All' || 
                              job.category?.toLowerCase() === selectedCategory.toLowerCase() ||
                              (selectedCategory === 'Remote' && job.type === 'remote');
+
+      const matchesLocation = currentLocation === 'Kerala' || job.location === currentLocation;
       
-      return matchesSearch && matchesCategory;
+      return matchesSearch && matchesCategory && matchesLocation;
     });
-  }, [rawJobs, searchQuery, selectedCategory]);
+  }, [rawJobs, searchQuery, selectedCategory, currentLocation]);
 
   const filteredWorkers = useMemo(() => {
     if (!rawWorkers) return [];
     return rawWorkers.filter(worker => {
       const matchesSearch = worker.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            worker.skills?.some((s: string) => s.toLowerCase().includes(searchQuery.toLowerCase()));
-      return matchesSearch;
+      const matchesLocation = currentLocation === 'Kerala' || worker.location === currentLocation;
+      return matchesSearch && matchesLocation;
     });
-  }, [rawWorkers, searchQuery]);
+  }, [rawWorkers, searchQuery, currentLocation]);
 
   const categories = ["All", "Design", "Development", "Writing", "Marketing", "Remote"];
 
@@ -126,7 +143,7 @@ export default function JobsPage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
           <div className="space-y-1">
             <h1 className="text-5xl font-black tracking-tight text-[#111827]">Job Hub</h1>
-            <p className="text-lg text-muted-foreground font-medium">Discover elite opportunities or hire world-class talent.</p>
+            <p className="text-lg text-muted-foreground font-medium">Discover elite opportunities or hire world-class talent in {currentLocation}.</p>
           </div>
           <Link href="/jobs/create">
             <Button className="bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-2xl h-14 px-8 font-black text-sm shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform">
@@ -162,10 +179,27 @@ export default function JobsPage() {
                 <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-14 h-16 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary/20 font-bold text-lg placeholder:text-muted-foreground/50" placeholder={activeTab === 'works' ? "Search jobs, skills, companies..." : "Search names, expertise, tags..."} />
               </div>
               <div className="flex items-center gap-4">
-                <Button variant="outline" className="h-16 rounded-2xl px-8 font-black border-muted-foreground/10 bg-white gap-3 text-sm">
-                  <MapPin className="w-5 h-5 text-primary" />
-                  Nepal <ChevronDown className="w-4 h-4" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="h-16 rounded-2xl px-8 font-black border-muted-foreground/10 bg-white gap-3 text-sm">
+                      <MapPin className="w-5 h-5 text-primary" />
+                      {currentLocation} <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="rounded-2xl w-56 p-0 shadow-2xl overflow-hidden">
+                    <ScrollArea className="h-[300px] w-full p-2">
+                      <DropdownMenuItem onClick={() => setCurrentLocation('Kerala')} className="rounded-xl font-bold py-3 px-4">
+                        All Kerala
+                      </DropdownMenuItem>
+                      <div className="h-px bg-muted my-1" />
+                      {keralaLocations.map(city => (
+                        <DropdownMenuItem key={city} onClick={() => setCurrentLocation(city)} className={cn("rounded-xl font-bold py-3 px-4", currentLocation === city && "bg-primary/5 text-primary")}>
+                          {city}
+                        </DropdownMenuItem>
+                      ))}
+                    </ScrollArea>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Button variant="outline" className="h-16 rounded-2xl px-6 font-black border-muted-foreground/10 bg-white text-[#6366f1] shadow-sm">
                   <Filter className="w-5 h-5" />
                 </Button>
@@ -225,14 +259,13 @@ export default function JobsPage() {
                 </Card>
               )) : (
                 <div className="text-center p-20 bg-white rounded-[2.5rem] border-dashed border-2">
-                  <p className="text-muted-foreground font-bold">No jobs found. Try adjusting your filters!</p>
+                  <p className="text-muted-foreground font-bold">No jobs found in {currentLocation}. Try adjusting your filters!</p>
                 </div>
               )}
             </div>
           </TabsContent>
 
           <TabsContent value="workers" className="space-y-6">
-            {/* ... Workers tab content remains largely same but updated to be cleaner ... */}
             <div className="flex items-center justify-between px-4">
               <h3 className="text-2xl font-black tracking-tight">Elite Workers <span className="text-muted-foreground font-medium ml-2 text-lg">({filteredWorkers.length})</span></h3>
             </div>
@@ -267,7 +300,7 @@ export default function JobsPage() {
                       ))}
                     </div>
                     <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest pt-2">
-                      <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {worker.location || 'Nepal'}</span>
+                      <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {worker.location || 'Kerala'}</span>
                       {worker.availabilityStatus === 'available' && <span className="flex items-center gap-1.5 text-emerald-600"><div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />Ready</span>}
                     </div>
                     <div className="flex items-center gap-3 pt-2">
@@ -285,7 +318,7 @@ export default function JobsPage() {
           <div className="relative z-10 grid lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-8">
               <Badge className="bg-white/20 text-white border-none px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-[0.2em]">Smart Matching</Badge>
-              <h2 className="text-5xl font-black leading-tight">Need a custom<br/>talent match?</h2>
+              <h2 className="text-5xl font-black leading-tight">Need a custom<br/>talent match in {currentLocation}?</h2>
               <p className="text-xl text-white/80 font-medium leading-relaxed max-w-lg">Our AI-powered engine analyzes your profile and project requirements to find the perfect professional match in seconds.</p>
               <Button className="bg-white text-primary hover:bg-white/90 rounded-2xl h-16 px-12 font-black text-lg shadow-2xl shadow-black/20 gap-3">
                 Try AI Matcher <ArrowRight className="w-6 h-6" />

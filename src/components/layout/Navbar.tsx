@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function Navbar() {
   const { user } = useUser();
@@ -23,7 +24,6 @@ export function Navbar() {
 
   useEffect(() => {
     setMounted(true);
-    // Listen for location changes in localStorage (simple sync for MVP)
     const checkLocation = () => {
       const loc = localStorage.getItem('quub_location') || 'Remote';
       if (loc !== location) setLocation(loc);
@@ -38,6 +38,12 @@ export function Navbar() {
     localStorage.setItem('quub_location', newLoc);
   };
 
+  const keralaLocations = [
+    "Kochi", "Trivandrum", "Kozhikode", "Thrissur", "Kollam", 
+    "Alappuzha", "Palakkad", "Malappuram", "Kannur", "Kottayam", 
+    "Idukki", "Wayanad", "Pathanamthitta", "Kasaragod", "Remote"
+  ];
+
   if (!mounted) return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-muted/10 hidden md:block">
       <div className="container mx-auto px-4 flex h-20 items-center justify-between">
@@ -50,7 +56,6 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-muted/10 hidden md:block">
       <div className="container mx-auto px-4 flex h-20 items-center justify-between">
-        {/* Logo Section */}
         <Link href="/" className="flex items-center gap-3 group">
           <div className="w-10 h-10 bg-[#6366f1] rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
             <span className="text-white text-xl font-headline font-black italic -ml-0.5">Q</span>
@@ -58,7 +63,6 @@ export function Navbar() {
           <span className="text-2xl font-headline font-black text-[#111827] tracking-tight">Quub</span>
         </Link>
 
-        {/* Dynamic Nav Content */}
         <div className="flex items-center gap-8">
           {user ? (
             <>
@@ -92,16 +96,18 @@ export function Navbar() {
                       </div>
                     </div>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="rounded-2xl w-56 p-2 shadow-2xl">
-                    <DropdownMenuItem onClick={() => updateLocation('Remote')} className="rounded-xl font-bold py-3 px-4 gap-2">
-                      <Navigation className="w-4 h-4 text-primary" /> Global / Remote
-                    </DropdownMenuItem>
-                    <div className="h-px bg-muted my-1" />
-                    {["Kathmandu", "Pokhara", "Lalitpur", "Biratnagar"].map(city => (
-                      <DropdownMenuItem key={city} onClick={() => updateLocation(city)} className={cn("rounded-xl font-bold py-3 px-4", location === city && "bg-primary/5 text-primary")}>
-                        {city}
+                  <DropdownMenuContent className="rounded-2xl w-56 p-0 shadow-2xl overflow-hidden">
+                    <ScrollArea className="h-[300px] w-full p-2">
+                      <DropdownMenuItem onClick={() => updateLocation('Remote')} className="rounded-xl font-bold py-3 px-4 gap-2 mb-1">
+                        <Navigation className="w-4 h-4 text-primary" /> Global / Remote
                       </DropdownMenuItem>
-                    ))}
+                      <div className="h-px bg-muted my-1" />
+                      {keralaLocations.map(city => (
+                        <DropdownMenuItem key={city} onClick={() => updateLocation(city)} className={cn("rounded-xl font-bold py-3 px-4", location === city && "bg-primary/5 text-primary")}>
+                          {city}
+                        </DropdownMenuItem>
+                      ))}
+                    </ScrollArea>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

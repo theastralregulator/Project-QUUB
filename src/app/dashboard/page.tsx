@@ -47,6 +47,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function DashboardPage() {
   const { user } = useUser();
@@ -67,7 +68,6 @@ export default function DashboardPage() {
     else if (hour < 17) setGreeting('Good Afternoon');
     else setGreeting('Good Evening');
 
-    // Load saved location from local storage
     const savedLoc = typeof window !== 'undefined' ? localStorage.getItem('quub_location') : null;
     if (savedLoc) setLocation(savedLoc);
   }, []);
@@ -86,9 +86,7 @@ export default function DashboardPage() {
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        // In a real app, we'd reverse-geocode position.coords
-        // For this MVP, we simulate a successful find
-        const simulatedCity = "Kathmandu"; 
+        const simulatedCity = "Kochi"; 
         updateLocation(simulatedCity);
         setIsLocating(false);
       },
@@ -103,7 +101,6 @@ export default function DashboardPage() {
     );
   };
 
-  // Queries
   const nearbyJobsQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(
@@ -121,7 +118,6 @@ export default function DashboardPage() {
   const { data: nearbyJobs, loading: nearbyLoading } = useCollection(nearbyJobsQuery);
   const { data: trendingJobs } = useCollection(trendingJobsQuery);
 
-  // AI Recommendations
   useEffect(() => {
     if (mounted && user && !recommendations && !isRecommending) {
       setIsRecommending(true);
@@ -202,7 +198,11 @@ export default function DashboardPage() {
     toast({ title: "Job Saved", description: "You can find it in your profile collection." });
   };
 
-  const popularCities = ["Kathmandu", "Pokhara", "Lalitpur", "Biratnagar", "Remote"];
+  const keralaLocations = [
+    "Kochi", "Trivandrum", "Kozhikode", "Thrissur", "Kollam", 
+    "Alappuzha", "Palakkad", "Malappuram", "Kannur", "Kottayam", 
+    "Idukki", "Wayanad", "Pathanamthitta", "Kasaragod", "Remote"
+  ];
 
   return (
     <div className="min-h-screen bg-[#F8F9FE] pb-24 lg:pb-12">
@@ -223,16 +223,18 @@ export default function DashboardPage() {
                       <span className="font-black text-sm">{location}</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="rounded-2xl w-48 p-2 border-muted-foreground/10 shadow-2xl">
-                    <DropdownMenuItem onClick={requestLocation} className="rounded-xl font-bold py-3 px-4 gap-2">
-                      <Navigation className="w-4 h-4 text-primary" /> Use Geolocation
-                    </DropdownMenuItem>
-                    <div className="h-px bg-muted my-1" />
-                    {popularCities.map(city => (
-                      <DropdownMenuItem key={city} onClick={() => updateLocation(city)} className={cn("rounded-xl font-bold py-3 px-4", location === city && "bg-primary/5 text-primary")}>
-                        {city}
+                  <DropdownMenuContent className="rounded-2xl w-56 p-0 border-muted-foreground/10 shadow-2xl overflow-hidden">
+                    <ScrollArea className="h-[300px] w-full p-2">
+                      <DropdownMenuItem onClick={requestLocation} className="rounded-xl font-bold py-3 px-4 gap-2 mb-1">
+                        <Navigation className="w-4 h-4 text-primary" /> Use Geolocation
                       </DropdownMenuItem>
-                    ))}
+                      <div className="h-px bg-muted my-1" />
+                      {keralaLocations.map(city => (
+                        <DropdownMenuItem key={city} onClick={() => updateLocation(city)} className={cn("rounded-xl font-bold py-3 px-4", location === city && "bg-primary/5 text-primary")}>
+                          {city}
+                        </DropdownMenuItem>
+                      ))}
+                    </ScrollArea>
                   </DropdownMenuContent>
                 </DropdownMenu>
 
@@ -341,12 +343,14 @@ export default function DashboardPage() {
                         <DropdownMenuTrigger asChild>
                           <Button variant="outline" className="rounded-2xl font-black text-xs h-12 px-8 border-primary/20 text-primary">Change Location</Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent className="rounded-2xl w-48 p-2 shadow-2xl">
-                          {popularCities.map(city => (
-                            <DropdownMenuItem key={city} onClick={() => updateLocation(city)} className="rounded-xl font-bold py-3 px-4">
-                              {city}
-                            </DropdownMenuItem>
-                          ))}
+                        <DropdownMenuContent className="rounded-2xl w-56 p-0 shadow-2xl overflow-hidden">
+                          <ScrollArea className="h-[250px] w-full p-2">
+                            {keralaLocations.map(city => (
+                              <DropdownMenuItem key={city} onClick={() => updateLocation(city)} className="rounded-xl font-bold py-3 px-4">
+                                {city}
+                              </DropdownMenuItem>
+                            ))}
+                          </ScrollArea>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>

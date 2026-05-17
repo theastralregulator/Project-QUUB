@@ -73,13 +73,15 @@ export default function CreateJobPage() {
       skills: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
       postedBy: user.uid,
       employerName: user.displayName || 'Anonymous',
+      status: 'pending',
       createdAt: serverTimestamp(),
       isUrgent: false
     };
 
     addDoc(collection(db, 'jobs'), jobData)
       .then(() => {
-        toast({ title: "Job Posted!", description: "Your opportunity is now live." });
+        toast({ title: "Job Posted Success!", description: "Your opportunity is now live and pending review." });
+        setLoading(false);
         router.push('/jobs');
       })
       .catch(async (serverError) => {
@@ -116,7 +118,7 @@ export default function CreateJobPage() {
                   <Input 
                     value={formData.title}
                     onChange={e => setFormData({ ...formData, title: e.target.value })}
-                    className="h-14 rounded-2xl bg-muted/30 border-none px-12" 
+                    className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
                     placeholder="e.g. Senior Product Designer"
                   />
                 </div>
@@ -138,7 +140,7 @@ export default function CreateJobPage() {
                 <Textarea 
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
-                  className="min-h-[150px] rounded-2xl bg-muted/30 border-none p-5" 
+                  className="min-h-[150px] rounded-2xl bg-muted/30 border-none p-5 focus-visible:ring-primary/20" 
                   placeholder="Describe the role, responsibilities and requirements..."
                 />
               </div>
@@ -149,10 +151,10 @@ export default function CreateJobPage() {
                   <div className="relative">
                     <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
                     <Select onValueChange={v => setFormData({...formData, category: v})} defaultValue={formData.category}>
-                      <SelectTrigger className="h-14 rounded-2xl bg-muted/30 border-none pl-12">
+                      <SelectTrigger className="h-14 rounded-2xl bg-muted/30 border-none pl-12 focus:ring-primary/20">
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="rounded-2xl">
                         {categories.map(cat => (
                           <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                         ))}
@@ -164,10 +166,10 @@ export default function CreateJobPage() {
                 <div className="space-y-2">
                   <Label className="text-xs font-black uppercase tracking-widest ml-1">Work Type</Label>
                   <Select onValueChange={v => setFormData({...formData, type: v})} defaultValue={formData.type}>
-                    <SelectTrigger className="h-14 rounded-2xl bg-muted/30 border-none">
+                    <SelectTrigger className="h-14 rounded-2xl bg-muted/30 border-none focus:ring-primary/20">
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-2xl">
                       <SelectItem value="remote">Remote</SelectItem>
                       <SelectItem value="onsite">On-site</SelectItem>
                       <SelectItem value="hybrid">Hybrid</SelectItem>
@@ -184,7 +186,7 @@ export default function CreateJobPage() {
                     <Input 
                       value={formData.budget}
                       onChange={e => setFormData({ ...formData, budget: e.target.value })}
-                      className="h-14 rounded-2xl bg-muted/30 border-none px-12" 
+                      className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
                       placeholder="e.g. $50/hr or $2,000"
                     />
                   </div>
@@ -197,7 +199,7 @@ export default function CreateJobPage() {
                     <Input 
                       value={formData.location}
                       onChange={e => setFormData({ ...formData, location: e.target.value })}
-                      className="h-14 rounded-2xl bg-muted/30 border-none px-12" 
+                      className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
                       placeholder="e.g. Remote or City, Country"
                     />
                   </div>
@@ -206,12 +208,15 @@ export default function CreateJobPage() {
 
               <div className="space-y-2">
                 <Label className="text-xs font-black uppercase tracking-widest ml-1">Skills (comma separated)</Label>
-                <Input 
-                  value={formData.skills}
-                  onChange={e => setFormData({ ...formData, skills: e.target.value })}
-                  className="h-14 rounded-2xl bg-muted/30 border-none px-5" 
-                  placeholder="React, Design, Node.js"
-                />
+                <div className="relative">
+                  <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input 
+                    value={formData.skills}
+                    onChange={e => setFormData({ ...formData, skills: e.target.value })}
+                    className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
+                    placeholder="React, Design, Node.js"
+                  />
+                </div>
               </div>
 
               <Button 

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from 'react';
@@ -285,9 +284,6 @@ export default function DashboardPage() {
                     </Link>
                     <DropdownMenuItem className="rounded-2xl font-black py-4 px-5 gap-3 cursor-pointer">
                       <Settings className="w-5 h-5 text-muted-foreground" /> Settings
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="rounded-2xl font-black py-4 px-5 gap-3 cursor-pointer">
-                      <CreditCard className="w-5 h-5 text-muted-foreground" /> Billing
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 

@@ -28,7 +28,7 @@ import {
   Zap,
   ArrowRight
 } from 'lucide-react';
-import Link from 'next/link';
+import Link from 'link';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -37,7 +37,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function JobsPage() {

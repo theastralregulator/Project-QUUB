@@ -14,7 +14,6 @@
         "userType": { "type": "string", "enum": ["worker", "employer", "both"] },
         "location": { "type": "string" },
         "avatarUrl": { "type": "string" },
-        "githubUrl": { "type": "string" },
         "rating": { "type": "number" },
         "reviewsCount": { "type": "number" },
         "availabilityStatus": { "type": "string", "enum": ["available", "busy"] },
@@ -44,7 +43,7 @@
     }
   },
   "auth": {
-    "providers": ["email", "google", "github"]
+    "providers": ["email", "google"]
   },
   "firestore": {
     "/users/{userId}": {

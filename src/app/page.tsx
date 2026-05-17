@@ -11,14 +11,10 @@ import {
   MessageSquare, 
   MapPin, 
   Bookmark,
-  Star,
-  Users2,
-  CheckCircle2,
   Facebook,
   Instagram,
   Twitter,
-  Linkedin,
-  Github
+  Linkedin
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -181,11 +177,6 @@ export default function LandingPage() {
                     Get Started Now <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </Link>
-                <Link href="https://github.com/theastralregulator/Project-QUUB.git" target="_blank" className="block">
-                  <Button variant="outline" className="w-full h-14 rounded-2xl font-bold text-lg gap-2">
-                    <Github className="w-5 h-5" /> View Project Source
-                  </Button>
-                </Link>
               </div>
             </div>
           </div>
@@ -206,9 +197,6 @@ export default function LandingPage() {
                 <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Instagram className="w-4 h-4" /></Button>
                 <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Twitter className="w-4 h-4" /></Button>
                 <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Linkedin className="w-4 h-4" /></Button>
-                <Link href="https://github.com/theastralregulator/Project-QUUB.git" target="_blank">
-                  <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Github className="w-4 h-4" /></Button>
-                </Link>
               </div>
             </div>
             <div>

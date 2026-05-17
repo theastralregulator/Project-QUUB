@@ -6,14 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Mail, Lock, User, AlertCircle, Github } from 'lucide-react';
+import { Loader2, Mail, Lock, User, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { 
   createUserWithEmailAndPassword, 
-  updateProfile,
-  GithubAuthProvider,
-  signInWithPopup
+  updateProfile
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
@@ -23,7 +21,6 @@ import { Separator } from '@/components/ui/separator';
 
 export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
-  const [githubLoading, setGithubLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     fname: '',
@@ -98,45 +95,6 @@ export default function SignUpPage() {
       }
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGithubSignUp = async () => {
-    if (!auth || !db) return;
-    setGithubLoading(true);
-    const provider = new GithubAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      
-      const userProfileData = {
-        name: user.displayName || 'Quub User',
-        email: user.email || '',
-        userType: 'both',
-        skills: [],
-        bio: '',
-        location: 'Remote',
-        avatarUrl: user.photoURL || `https://picsum.photos/seed/${user.uid}/200`,
-        githubUrl: `https://github.com/${(user as any).reloadUserInfo.screenName || ''}`,
-        rating: 5.0,
-        reviewsCount: 0,
-        availabilityStatus: 'available',
-        createdAt: serverTimestamp()
-      };
-
-      const userRef = doc(db, 'users', user.uid);
-      await setDoc(userRef, userProfileData, { merge: true });
-
-      toast({ title: "Connected with GitHub", description: "Your account is ready!" });
-      router.push('/dashboard');
-    } catch (error: any) {
-      toast({ 
-        variant: "destructive", 
-        title: "GitHub Connection Failed", 
-        description: error.message || "Could not link GitHub account." 
-      });
-    } finally {
-      setGithubLoading(false);
     }
   };
 
@@ -227,27 +185,6 @@ export default function SignUpPage() {
                 {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Create Account"}
               </Button>
             </div>
-          </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <Separator />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-muted-foreground font-bold">Or register with</span>
-            </div>
-          </div>
-
-          <div className="grid gap-4">
-            <Button 
-              variant="outline" 
-              onClick={handleGithubSignUp} 
-              disabled={githubLoading}
-              className="h-14 rounded-2xl border-muted-foreground/10 font-black gap-3 hover:bg-muted/50"
-            >
-              {githubLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Github className="w-5 h-5" />}
-              GitHub
-            </Button>
           </div>
 
           <p className="text-center text-sm text-muted-foreground">

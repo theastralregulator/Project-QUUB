@@ -230,9 +230,9 @@ export default function LandingPage() {
               <Link href="/" className="flex items-center gap-4 group">
                 <div className="w-12 h-12 group-hover:scale-105 transition-transform shrink-0">
                   <svg viewBox="0 0 32 32" className="w-full h-full text-[#6366f1] drop-shadow-xl" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="32" height="32" rx="8" fill="currentColor"/>
-                    <circle cx="16" cy="14" r="6" stroke="white" strokeWidth="3"/>
-                    <path d="M20.5 19.5L24 23" stroke="white" strokeWidth="3" strokeLinecap="round"/>
+                    <path d="M16 2C8.268 2 2 8.268 2 16c0 3.018.956 5.811 2.584 8.102L2 30l6.09-2.436A13.938 13.938 0 0 0 16 30c7.732 0 14-6.268 14-14S23.732 2 16 2z" fill="currentColor" />
+                    <circle cx="16" cy="16" r="6" fill="white" />
+                    <path d="M19 19l3 3" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
                   </svg>
                 </div>
                 <span className="text-4xl font-headline font-black text-[#111827] tracking-tighter">Quub</span>

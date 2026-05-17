@@ -55,6 +55,8 @@
   }
   body {
     @apply bg-background text-foreground font-body;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline font-bold tracking-tight;
@@ -66,7 +68,8 @@
 }
 
 .mobile-bottom-nav {
-  @apply fixed bottom-0 left-0 right-0 h-16 bg-white border-t flex items-center justify-around z-50 md:hidden;
+  @apply fixed bottom-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-xl border-t flex items-center justify-around z-50 md:hidden;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* Custom scrollbar for no-scrollbar utility */
@@ -76,4 +79,19 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Production Polish */
+.selection-primary::selection {
+  @apply bg-primary text-white;
+}
+
+/* Smooth transitions */
+.transition-slow {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
 }

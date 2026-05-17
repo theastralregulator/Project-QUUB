@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,7 +13,12 @@ import {
   Facebook,
   Instagram,
   Twitter,
-  Linkedin
+  Linkedin,
+  CheckCircle2,
+  TrendingUp,
+  ShieldCheck,
+  Zap,
+  Globe
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -35,71 +39,77 @@ export default function LandingPage() {
 
   const features = [
     {
-      title: "Find Work",
-      desc: "Discover real opportunities that match your skills and earn on your terms.",
+      title: "Smart Job Hub",
+      desc: "Discover premium opportunities curated by AI to match your exact expertise.",
       icon: Briefcase,
     },
     {
-      title: "Find Workers",
-      desc: "Hire trusted and skilled workers for any job, nearby or remote.",
+      title: "Vetted Talent",
+      desc: "Hire verified professionals across Kerala, from Kochi to Trivandrum.",
       icon: Users,
     },
     {
-      title: "Real-time Messaging",
-      desc: "Chat instantly, share files, and stay updated in real-time.",
+      title: "Enterprise Messaging",
+      desc: "Secure, real-time collaboration with integrated file sharing and updates.",
       icon: MessageSquare,
     },
     {
-      title: "Nearby Opportunities",
-      desc: "Find jobs and workers near you and get things done faster.",
+      title: "Hyper-Local Focus",
+      desc: "The only platform dedicated to the Kerala freelance economy.",
       icon: MapPin,
     },
     {
-      title: "Save & Track",
-      desc: "Save jobs and workers, and easily track your recent activity.",
-      icon: Bookmark,
+      title: "Secure Payments",
+      desc: "Trust-based system ensuring you get paid for every milestone reached.",
+      icon: ShieldCheck,
     }
   ];
 
-  return (
-    <div className="flex flex-col min-h-screen bg-[#F9FAFB]">
-      {/* Hero Section */}
-      <section className="relative pt-20 pb-24 md:pt-32 md:pb-40 overflow-hidden bg-gradient-to-b from-white to-[#F3F4F6]">
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-8 animate-in fade-in slide-in-from-left-6 duration-1000">
-              <Badge variant="secondary" className="px-4 py-1.5 text-primary bg-primary/10 rounded-full border-primary/20 text-xs font-bold uppercase tracking-wider">
-                <Sparkles className="w-3.5 h-3.5 mr-2" />
-                The smarter way to find & get work done
-              </Badge>
-              
-              <h1 className="text-6xl md:text-7xl font-headline font-black leading-[1.1] tracking-tight text-[#111827]">
-                Find <span className="text-primary">Work.</span><br />
-                Find <span className="text-primary">Workers.</span><br />
-                Build Faster.
-              </h1>
-              
-              <p className="text-lg md:text-xl text-[#4B5563] max-w-xl font-medium leading-relaxed">
-                Quub connects skilled people with real opportunities. Post jobs, find trusted workers nearby, and get things done — faster and better.
-              </p>
+  const stats = [
+    { label: "Active Workers", value: "15k+", icon: Users },
+    { label: "Jobs Completed", value: "45k+", icon: CheckCircle2 },
+    { label: "Total Earnings", value: "₹5Cr+", icon: TrendingUp },
+    { label: "District Coverage", value: "14", icon: Globe },
+  ];
 
-              <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
+  return (
+    <div className="flex flex-col min-h-screen bg-white">
+      {/* Hero Section */}
+      <section className="relative pt-16 pb-32 md:pt-28 md:pb-48 overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-indigo-50 via-white to-white">
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid lg:grid-cols-12 gap-16 items-center">
+            <div className="lg:col-span-7 space-y-10 animate-in fade-in slide-in-from-left-6 duration-1000">
+              <div className="space-y-4">
+                <Badge variant="secondary" className="px-5 py-2 text-primary bg-primary/10 rounded-full border-primary/20 text-xs font-black uppercase tracking-widest animate-pulse">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Now Live Across Kerala
+                </Badge>
+                <h1 className="text-6xl md:text-8xl font-headline font-black leading-[0.95] tracking-tighter text-[#111827]">
+                  The Future of <br />
+                  <span className="text-primary">Work</span> is Local.
+                </h1>
+                <p className="text-xl md:text-2xl text-[#4B5563] max-w-2xl font-medium leading-relaxed">
+                  Quub is Kerala's elite workspace. We connect skilled professionals with ambitious projects, helping you build faster and smarter.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center gap-5 pt-4">
                 <Link href="/auth/signup" className="w-full sm:w-auto">
-                  <Button size="lg" className="w-full sm:w-auto text-lg px-8 h-14 rounded-2xl font-bold shadow-xl shadow-primary/30 gap-2 bg-primary">
-                    Get Started <ArrowRight className="w-5 h-5" />
+                  <Button size="lg" className="w-full sm:w-auto text-xl px-12 h-20 rounded-3xl font-black shadow-2xl shadow-primary/40 gap-3 bg-primary hover:scale-[1.02] active:scale-95 transition-all">
+                    Get Started <ArrowRight className="w-6 h-6" />
                   </Button>
                 </Link>
                 <Link href="/jobs" className="w-full sm:w-auto">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 h-14 rounded-2xl font-bold border-2 hover:bg-muted/50">
-                    Explore Quub
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto text-xl px-12 h-20 rounded-3xl font-black border-2 border-muted-foreground/10 hover:bg-muted/50 transition-all">
+                    Explore Hub
                   </Button>
                 </Link>
               </div>
 
-              <div className="flex items-center gap-4 pt-6">
-                <div className="flex -space-x-3">
+              <div className="flex items-center gap-6 pt-10 border-t border-muted-foreground/10">
+                <div className="flex -space-x-4">
                   {avatarGroup.map((avatar, i) => (
-                    <div key={i} className="w-10 h-10 rounded-full border-2 border-white overflow-hidden relative shadow-sm">
+                    <div key={i} className="w-14 h-14 rounded-full border-4 border-white overflow-hidden relative shadow-xl hover:translate-y-[-4px] transition-transform">
                       <Image 
                         src={avatar?.imageUrl || ''} 
                         alt="User" 
@@ -109,45 +119,77 @@ export default function LandingPage() {
                       />
                     </div>
                   ))}
+                  <div className="w-14 h-14 rounded-full border-4 border-white bg-primary flex items-center justify-center text-white font-black text-xs shadow-xl">
+                    +15k
+                  </div>
                 </div>
-                <p className="text-sm font-bold text-[#4B5563]">
-                  Join 10,000+ people building<br />and growing with Quub 💜
-                </p>
+                <div>
+                  <p className="text-sm font-black text-[#111827] uppercase tracking-widest">Global Standard</p>
+                  <p className="text-sm font-medium text-[#4B5563]">Join Kerala's fastest growing professional network.</p>
+                </div>
               </div>
             </div>
 
-            <div className="relative h-[600px] hidden lg:block animate-in fade-in slide-in-from-right-6 duration-1000 delay-200">
-              <div className="absolute top-0 right-0 w-[300px] h-[580px] rounded-[3rem] border-8 border-[#111827] bg-[#111827] shadow-2xl z-20 overflow-hidden transform rotate-6 translate-y-10">
+            <div className="lg:col-span-5 relative h-[700px] hidden lg:block animate-in fade-in slide-in-from-right-6 duration-1000 delay-200">
+              <div className="absolute top-0 right-0 w-[350px] h-[650px] rounded-[4rem] border-[12px] border-[#111827] bg-[#111827] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] z-20 overflow-hidden transform rotate-6 translate-y-12">
                 <Image src={mockups[1]?.imageUrl || ''} alt="Worker Profile" fill className="object-cover" data-ai-hint="worker profile" />
               </div>
-              <div className="absolute top-10 left-10 w-[300px] h-[580px] rounded-[3rem] border-8 border-[#111827] bg-[#111827] shadow-2xl z-10 overflow-hidden transform -rotate-6">
+              <div className="absolute top-20 left-0 w-[350px] h-[650px] rounded-[4rem] border-[12px] border-[#111827] bg-[#111827] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] z-10 overflow-hidden transform -rotate-6">
                 <Image src={mockups[0]?.imageUrl || ''} alt="Dashboard" fill className="object-cover" data-ai-hint="mobile dashboard" />
               </div>
+              
               {/* Decorative elements */}
-              <div className="absolute top-1/4 -right-10 w-20 h-20 bg-primary/10 rounded-2xl blur-xl" />
-              <div className="absolute bottom-1/4 -left-10 w-32 h-32 bg-accent/10 rounded-full blur-2xl" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-primary/5 rounded-full blur-3xl -z-10" />
+              <div className="absolute bottom-10 right-10 w-40 h-40 bg-indigo-500/10 rounded-[3rem] blur-2xl z-0" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Why Choose Quub? */}
-      <section className="py-24 bg-white">
+      {/* Live Stats */}
+      <section className="py-24 bg-white border-y border-muted/20">
         <div className="container mx-auto px-4">
-          <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
-            <h2 className="text-4xl font-headline font-black text-[#111827]">Why Choose Quub?</h2>
-            <p className="text-lg text-[#6B7280] font-medium">Everything you need to connect, collaborate, and get results.</p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">
+            {stats.map((stat, i) => (
+              <div key={i} className="flex flex-col items-center text-center space-y-4">
+                <div className="w-16 h-16 bg-primary/5 rounded-2xl flex items-center justify-center text-primary">
+                  <stat.icon className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="text-5xl font-black tracking-tighter text-[#111827]">{stat.value}</h3>
+                  <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mt-1">{stat.label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-32 bg-[#F8F9FE]">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-end justify-between mb-20 gap-8">
+            <div className="space-y-4 max-w-2xl">
+              <Badge className="bg-primary/10 text-primary border-none font-black text-[10px] uppercase tracking-widest px-4 py-1.5 rounded-full">Core Infrastructure</Badge>
+              <h2 className="text-5xl font-black tracking-tight text-[#111827]">Built for the <br/>Modern Economy.</h2>
+              <p className="text-xl text-[#6B7280] font-medium">Everything you need to hire, collaborate, and scale your operations.</p>
+            </div>
+            <Link href="/auth/signup">
+              <Button variant="ghost" className="font-black text-primary gap-2 text-lg hover:bg-primary/5">Explore All Features <ArrowRight className="w-5 h-5" /></Button>
+            </Link>
           </div>
 
-          <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6">
+          <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-8">
             {features.map((f, i) => (
-              <Card key={i} className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2rem] bg-white group hover:shadow-xl transition-all duration-300">
-                <CardContent className="p-8 text-center space-y-4">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto transition-transform group-hover:scale-110">
-                    <f.icon className="w-7 h-7 text-primary" />
+              <Card key={i} className="border-none shadow-sm rounded-[3rem] bg-white group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden">
+                <CardContent className="p-10 text-left space-y-6">
+                  <div className="w-16 h-16 rounded-2xl bg-muted/30 flex items-center justify-center transition-transform group-hover:scale-110 group-hover:bg-primary group-hover:text-white">
+                    <f.icon className="w-8 h-8" />
                   </div>
-                  <h3 className="font-bold text-lg text-[#111827]">{f.title}</h3>
-                  <p className="text-sm text-[#6B7280] leading-relaxed">{f.desc}</p>
+                  <div className="space-y-3">
+                    <h3 className="font-black text-xl text-[#111827] leading-tight">{f.title}</h3>
+                    <p className="text-sm text-[#6B7280] leading-relaxed font-medium">{f.desc}</p>
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -155,80 +197,87 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* About Section */}
-      <section className="py-24 bg-[#F3F4F6]">
+      {/* Call to Action */}
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-4">
-          <div className="bg-white rounded-[3rem] p-12 lg:p-20 shadow-sm flex flex-col lg:flex-row items-center gap-16">
-            <div className="w-32 h-32 md:w-48 md:h-48 rounded-[2.5rem] bg-primary flex items-center justify-center shrink-0">
-               <span className="text-white text-7xl md:text-9xl font-headline font-black tracking-tighter">Q.</span>
-            </div>
-            <div className="flex-1 space-y-6">
-              <h2 className="text-4xl font-headline font-black text-[#111827]">About Quub</h2>
-              <p className="text-lg text-[#4B5563] leading-relaxed max-w-2xl font-medium">
-                Quub is a mobile-first platform that connects people who get things done with those who need things done. Whether you're looking for work or looking to hire, Quub makes it simple, fast, and reliable.
-              </p>
-            </div>
-            <div className="bg-[#F9FAFB] p-10 rounded-[2.5rem] space-y-6 w-full lg:w-[350px]">
-              <p className="text-xl font-bold text-[#111827]">Ready to get started?</p>
-              <p className="text-sm text-[#6B7280] font-medium">Join Quub today and be a part of a growing community.</p>
-              <div className="space-y-3">
-                <Link href="/auth/signup" className="block">
-                  <Button className="w-full h-14 rounded-2xl font-bold text-lg bg-primary shadow-lg shadow-primary/20">
-                    Get Started Now <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
+          <div className="bg-gradient-to-br from-primary to-[#6366f1] rounded-[4rem] p-12 lg:p-24 text-white text-center space-y-12 relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://picsum.photos/seed/bg-noise/1200/800')] opacity-10 mix-blend-overlay" />
+            <div className="relative z-10 space-y-8 max-w-4xl mx-auto">
+              <h2 className="text-5xl md:text-7xl font-black leading-tight tracking-tighter">Ready to join the <br /> elite workforce?</h2>
+              <p className="text-xl md:text-2xl text-white/80 font-medium">Stop hunting for work. Start building your legacy on Kerala's most trusted professional platform.</p>
+              <div className="flex flex-col sm:flex-row justify-center items-center gap-6 pt-6">
+                <Link href="/auth/signup" className="w-full sm:w-auto">
+                  <Button className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 h-20 px-14 rounded-3xl font-black text-xl shadow-2xl">Create Free Account</Button>
+                </Link>
+                <Link href="/jobs" className="w-full sm:w-auto">
+                  <Button variant="outline" className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10 h-20 px-14 rounded-3xl font-black text-xl">Browse Openings</Button>
                 </Link>
               </div>
             </div>
+            
+            <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute -top-20 -right-20 w-80 h-80 bg-indigo-400/20 rounded-full blur-3xl" />
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-white pt-24 pb-12 border-t">
+      <footer className="bg-[#F8F9FE] pt-32 pb-16 border-t border-muted/20">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-5 gap-12 mb-20">
-            <div className="md:col-span-2 space-y-6">
-              <Link href="/" className="flex items-center space-x-2">
-                <span className="text-3xl font-headline font-black text-primary tracking-tighter">Quub.</span>
+          <div className="grid lg:grid-cols-12 gap-20 mb-24">
+            <div className="lg:col-span-5 space-y-10">
+              <Link href="/" className="flex items-center gap-4 group">
+                <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-xl shadow-primary/20">
+                  <span className="text-white text-2xl font-headline font-black italic">Q</span>
+                </div>
+                <span className="text-4xl font-headline font-black text-[#111827] tracking-tighter">Quub</span>
               </Link>
-              <p className="text-[#6B7280] text-base max-w-xs font-medium">Find Work. Find Workers. Build Faster.</p>
-              <div className="flex gap-4">
-                <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Facebook className="w-4 h-4" /></Button>
-                <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Instagram className="w-4 h-4" /></Button>
-                <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Twitter className="w-4 h-4" /></Button>
-                <Button variant="outline" size="icon" className="rounded-xl w-10 h-10"><Linkedin className="w-4 h-4" /></Button>
+              <p className="text-[#6B7280] text-xl max-w-md font-medium leading-relaxed">
+                Empowering the professional community of Kerala. Find work, hire talent, and build the future — together.
+              </p>
+              <div className="flex gap-5">
+                {[Facebook, Instagram, Twitter, Linkedin].map((Icon, i) => (
+                  <Button key={i} variant="outline" size="icon" className="rounded-2xl w-14 h-14 border-muted-foreground/10 bg-white hover:bg-primary hover:text-white transition-all">
+                    <Icon className="w-6 h-6" />
+                  </Button>
+                ))}
               </div>
             </div>
-            <div>
-              <h4 className="font-bold text-[#111827] mb-6">Platform</h4>
-              <ul className="space-y-4 text-sm font-medium text-[#6B7280]">
-                <li><Link href="#" className="hover:text-primary transition-colors">How It Works</Link></li>
-                <li><Link href="/jobs" className="hover:text-primary transition-colors">Browse Jobs</Link></li>
-                <li><Link href="/jobs?tab=workers" className="hover:text-primary transition-colors">Browse Workers</Link></li>
-                <li><Link href="#" className="hover:text-primary transition-colors">Pricing</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold text-[#111827] mb-6">Company</h4>
-              <ul className="space-y-4 text-sm font-medium text-[#6B7280]">
-                <li><Link href="#" className="hover:text-primary transition-colors">About Us</Link></li>
-                <li><Link href="#" className="hover:text-primary transition-colors">Contact Us</Link></li>
-                <li><Link href="#" className="hover:text-primary transition-colors">Careers</Link></li>
-                <li><Link href="#" className="hover:text-primary transition-colors">Blog</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold text-[#111827] mb-6">Support</h4>
-              <ul className="space-y-4 text-sm font-medium text-[#6B7280]">
-                <li><Link href="#" className="hover:text-primary transition-colors">Help Center</Link></li>
-                <li><Link href="#" className="hover:text-primary transition-colors">Safety</Link></li>
-                <li><Link href="#" className="hover:text-primary transition-colors">Terms of Service</Link></li>
-                <li><Link href="#" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
-              </ul>
+            
+            <div className="lg:col-span-7 grid grid-cols-2 md:grid-cols-3 gap-12">
+              <div className="space-y-8">
+                <h4 className="font-black text-sm uppercase tracking-widest text-[#111827]">Platform</h4>
+                <ul className="space-y-5 text-base font-bold text-[#6B7280]">
+                  <li><Link href="/jobs" className="hover:text-primary transition-colors">Job Hub</Link></li>
+                  <li><Link href="/jobs?tab=workers" className="hover:text-primary transition-colors">Browse Talent</Link></li>
+                  <li><Link href="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link></li>
+                  <li><Link href="/profile/me" className="hover:text-primary transition-colors">My Profile</Link></li>
+                </ul>
+              </div>
+              <div className="space-y-8">
+                <h4 className="font-black text-sm uppercase tracking-widest text-[#111827]">Company</h4>
+                <ul className="space-y-5 text-base font-bold text-[#6B7280]">
+                  <li><Link href="#" className="hover:text-primary transition-colors">About Us</Link></li>
+                  <li><Link href="#" className="hover:text-primary transition-colors">Careers</Link></li>
+                  <li><Link href="#" className="hover:text-primary transition-colors">Press Kit</Link></li>
+                  <li><Link href="#" className="hover:text-primary transition-colors">Brand Assets</Link></li>
+                </ul>
+              </div>
+              <div className="space-y-8">
+                <h4 className="font-black text-sm uppercase tracking-widest text-[#111827]">Legal</h4>
+                <ul className="space-y-5 text-base font-bold text-[#6B7280]">
+                  <li><Link href="#" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+                  <li><Link href="#" className="hover:text-primary transition-colors">Terms of Service</Link></li>
+                  <li><Link href="#" className="hover:text-primary transition-colors">Security</Link></li>
+                  <li><Link href="#" className="hover:text-primary transition-colors">Cookies</Link></li>
+                </ul>
+              </div>
             </div>
           </div>
-          <div className="pt-8 border-t text-center text-sm font-bold text-[#9CA3AF]">
-            <p>© 2025 Quub. All rights reserved.</p>
+          
+          <div className="pt-12 border-t border-muted-foreground/10 flex flex-col md:flex-row items-center justify-between gap-6 text-sm font-black text-[#9CA3AF] uppercase tracking-widest">
+            <p>© 2025 Quub Technologies Pvt Ltd. All rights reserved.</p>
+            <p className="flex items-center gap-2"><MapPin className="w-4 h-4" /> Kochi, Kerala, India</p>
           </div>
         </div>
       </footer>

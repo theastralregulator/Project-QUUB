@@ -6,8 +6,11 @@ import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  title: 'Quub | Find Work. Find Workers. Build Faster.',
-  description: 'The modern freelance marketplace for elite talent and ambitious projects.',
+  title: 'Quub | The Future of Work in Kerala',
+  description: 'Connect with elite local talent or find your next big opportunity. Quub is the smartest way to hire and get hired across Kerala.',
+  keywords: ['freelance', 'Kerala jobs', 'Kochi tech', 'Trivandrum talent', 'Quub', 'work marketplace'],
+  authors: [{ name: 'Quub Team' }],
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
 };
 
 export default function RootLayout({
@@ -16,16 +19,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="scroll-smooth">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@600;700;800;900&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased min-h-screen pb-20 md:pb-0">
+      <body className="font-body antialiased min-h-screen bg-background selection:bg-primary/20 selection:text-primary">
         <FirebaseClientProvider>
           <Navbar />
-          <main>{children}</main>
+          <main className="relative">{children}</main>
           <MobileNav />
           <Toaster />
         </FirebaseClientProvider>

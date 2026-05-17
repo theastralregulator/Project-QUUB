@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from 'react';
@@ -18,7 +17,9 @@ import {
   PieChart,
   Atom,
   ChevronRight,
-  Loader2
+  Loader2,
+  Crown,
+  Sparkles
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -45,7 +46,7 @@ export default function ProfilePage() {
   const stats = [
     { label: "Member Since", value: profileData?.createdAt ? new Date(profileData.createdAt.seconds * 1000).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "June 2023", icon: Calendar, color: "text-purple-600 bg-purple-50" },
     { label: "Job Success Rate", value: "98%", icon: TrendingUp, color: "text-green-600 bg-green-50" },
-    { label: "Total Earned", value: "NPR 1,250,000+", icon: Wallet, color: "text-indigo-600 bg-indigo-50" },
+    { label: "Total Earned", value: "₹1,25,000+", icon: Wallet, color: "text-indigo-600 bg-indigo-50" },
     { label: "Jobs Completed", value: "115", icon: CheckCircle2, color: "text-emerald-600 bg-emerald-50" },
     { label: "Active Projects", value: "2", icon: Briefcase, color: "text-violet-600 bg-violet-50" },
   ];
@@ -53,25 +54,25 @@ export default function ProfilePage() {
   const projects = [
     {
       title: "Website Redesign",
-      desc: "We need a platform and website redesign for your business.",
+      desc: "Comprehensive platform and brand redesign for a high-growth tech startup.",
       image: "https://picsum.photos/seed/project1/600/400",
       color: "bg-indigo-600"
     },
     {
       title: "Mobile App Development",
-      desc: "Develop Development mobile app for Android and iOS.",
+      desc: "Cross-platform mobile application for real-time logistics tracking.",
       image: "https://picsum.photos/seed/project2/600/400",
       color: "bg-emerald-500"
     }
   ];
 
   const reviews = [
-    { name: "Aakash R.", time: "5 date ago", rating: 5, text: "Great realize your experience with marti and developer in making a bushing project is wellout." },
-    { name: "Aakash R.", time: "5 date ago", rating: 5, text: "Great to have 4+ years of experience in UI/UX design. I have worked a similar projects before." },
-    { name: "Aakash R.", time: "2 date ago", rating: 5, text: "Great to hear that. Can your time so xrm and great I visibility from your reviews!" }
+    { name: "Aakash R.", time: "5 days ago", rating: 5, text: "Incredible attention to detail and deep understanding of modern UI patterns." },
+    { name: "Meera K.", time: "2 weeks ago", rating: 5, text: "Delivered the project ahead of schedule with exceptional quality." },
+    { name: "Rahul S.", time: "1 month ago", rating: 5, text: "A true professional who knows how to scale tech stacks effectively." }
   ];
 
-  const skills = profileData?.skills?.length ? profileData.skills : ["React", "Node.js", "JavaScript", "MongoDB", "UI/UX Design", "Mobile Design", "Frotnet & Analytics"];
+  const skills = profileData?.skills?.length ? profileData.skills : ["React", "Node.js", "Firebase", "Next.js", "UI/UX Design", "System Architecture"];
 
   if (!mounted || authLoading) {
     return (
@@ -81,21 +82,29 @@ export default function ProfilePage() {
     );
   }
 
+  const getTierIcon = (tier: string) => {
+    switch (tier) {
+      case 'gold': return <Crown className="w-5 h-5 text-yellow-500" />;
+      case 'silver': return <Star className="w-5 h-5 text-slate-400" />;
+      default: return <Sparkles className="w-5 h-5 text-primary" />;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F9FE] pb-24 lg:pb-12 pt-8">
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div className="space-y-1 text-left">
             <h1 className="text-4xl font-black tracking-tight">My Profile</h1>
-            <p className="text-muted-foreground font-medium">Connect, chat and get things done.</p>
+            <p className="text-muted-foreground font-medium">Manage your professional identity and workspace.</p>
           </div>
           <div className="flex items-center gap-3">
             <Button variant="outline" className="rounded-xl h-12 px-6 font-black text-sm border-muted-foreground/20 bg-white">
               Edit Profile
             </Button>
-            <Link href="/jobs/create">
-              <Button className="bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-xl h-12 px-6 font-black text-sm shadow-xl shadow-primary/20">
-                <Plus className="w-4 h-4 mr-2" /> Post a Job
+            <Link href="/upgrades">
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl h-12 px-6 font-black text-sm shadow-xl shadow-orange-500/20">
+                <Sparkles className="w-4 h-4 mr-2" /> Upgrade Tier
               </Button>
             </Link>
           </div>
@@ -109,22 +118,29 @@ export default function ProfilePage() {
             <div className="absolute top-20 right-1/4 translate-x-1/2 opacity-20 hidden lg:block">
               <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg transform rotate-12"><Star className="w-8 h-8 text-yellow-500 fill-yellow-500" /></div>
             </div>
-            <div className="absolute bottom-20 left-1/3 -translate-x-full opacity-20 hidden lg:block">
-              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg transform rotate-6"><Atom className="w-8 h-8 text-emerald-500" /></div>
-            </div>
 
             <div className="relative mb-6">
               <Avatar className="w-32 h-32 rounded-full border-8 border-white shadow-2xl">
                 <AvatarImage src={profileData?.avatarUrl || user?.photoURL || `https://picsum.photos/seed/${user?.uid || 'aman'}/400`} />
                 <AvatarFallback className="text-3xl font-black">{profileData?.name?.[0] || user?.displayName?.[0] || 'A'}</AvatarFallback>
               </Avatar>
+              <div className="absolute -bottom-2 right-0 bg-white p-2 rounded-2xl shadow-xl">
+                {getTierIcon(profileData?.accountType)}
+              </div>
             </div>
             
             <div className="space-y-3 mb-8">
               <h2 className="text-4xl font-black tracking-tight text-[#111827]">{profileData?.name || user?.displayName || "Member"}</h2>
-              <p className="text-lg font-bold text-[#6B7280]">{profileData?.bio || "Professional Member"}</p>
+              <p className="text-lg font-bold text-[#6B7280]">{profileData?.bio || "Elite Professional in Kerala"}</p>
               <div className="flex items-center justify-center gap-3">
-                <Badge variant="secondary" className="bg-[#EBEFFF] text-[#6366f1] font-black px-5 py-1.5 rounded-full text-[10px] uppercase tracking-widest border-none">Premium Member</Badge>
+                <Badge variant="secondary" className={cn(
+                  "font-black px-5 py-1.5 rounded-full text-[10px] uppercase tracking-widest border-none",
+                  profileData?.accountType === 'gold' ? "bg-yellow-50 text-yellow-600" :
+                  profileData?.accountType === 'silver' ? "bg-slate-100 text-slate-600" :
+                  "bg-[#EBEFFF] text-[#6366f1]"
+                )}>
+                  {profileData?.accountType || 'Standard'} Member
+                </Badge>
               </div>
             </div>
 

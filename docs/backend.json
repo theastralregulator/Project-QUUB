@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "UserProfile": {
@@ -13,6 +12,7 @@
         "skills": { "type": "array", "items": { "type": "string" } },
         "userType": { "type": "string", "enum": ["worker", "employer", "both"] },
         "role": { "type": "string", "enum": ["user", "admin"], "default": "user" },
+        "accountType": { "type": "string", "enum": ["standard", "silver", "gold"], "default": "standard" },
         "isVerified": { "type": "boolean", "default": false },
         "isBanned": { "type": "boolean", "default": false },
         "location": { "type": "string" },

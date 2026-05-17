@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from 'react';
@@ -34,7 +33,8 @@ import {
   LogOut,
   Settings,
   CreditCard,
-  ShieldAlert
+  ShieldAlert,
+  Crown
 } from 'lucide-react';
 import { collection, query, limit, orderBy, where, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
@@ -160,10 +160,10 @@ export default function DashboardPage() {
         userType: 'worker',
         userProfile: {
           name: user.displayName || 'User',
-          bio: 'Looking for exciting projects in Kerala',
-          skills: ['React', 'Next.js', 'Firebase', 'Strategy'],
+          bio: profile?.bio || 'Looking for exciting projects in Kerala',
+          skills: profile?.skills || ['React', 'Next.js', 'Firebase'],
           location: location,
-          preferences: ['Remote', 'Full-time', 'Freelance'],
+          preferences: ['Remote', 'Full-time'],
           activity: ['Recently viewed high-growth opportunities']
         }
       }).then(res => {
@@ -171,7 +171,7 @@ export default function DashboardPage() {
         setIsRecommending(false);
       }).catch(() => setIsRecommending(false));
     }
-  }, [mounted, user, location, recommendations, isRecommending]);
+  }, [mounted, user, location, recommendations, isRecommending, profile]);
 
   const activityData = [
     { day: 'Mon', apps: 4 },
@@ -224,11 +224,19 @@ export default function DashboardPage() {
   };
 
   const locations = [
-    "Kerala", "Kochi", "Trivandrum", "Kozhikode", "Thrissur", "Kollam", 
-    "Alappuzha", "Palakkad", "Malappuram", "Kannur", "Kottayam", 
-    "Idukki", "Wayanad", "Pathanamthitta", "Kasaragod", "Tamil Nadu", 
-    "Karnataka", "Maharashtra", "Delhi", "Remote"
+    "Kerala", "Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod", 
+    "Kollam", "Kottayam", "Kozhikode", "Malappuram", "Palakkad", 
+    "Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad",
+    "Tamil Nadu", "Karnataka", "Maharashtra", "Delhi", "Remote"
   ];
+
+  const getTierIcon = (type: string) => {
+    switch (type) {
+      case 'gold': return <Crown className="w-4 h-4 text-yellow-500" />;
+      case 'silver': return <Star className="w-4 h-4 text-slate-400" />;
+      default: return <Zap className="w-4 h-4 text-primary" />;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F8F9FE] pb-24 lg:pb-12 pt-8">
@@ -239,7 +247,14 @@ export default function DashboardPage() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <Badge className="bg-primary/10 text-primary border-none font-black text-[10px] uppercase tracking-widest px-4 py-1.5 rounded-full">Workspace Live</Badge>
+                  <Badge className={cn(
+                    "border-none font-black text-[10px] uppercase tracking-widest px-4 py-1.5 rounded-full",
+                    profile?.accountType === 'gold' ? "bg-yellow-50 text-yellow-600" : 
+                    profile?.accountType === 'silver' ? "bg-slate-100 text-slate-600" :
+                    "bg-primary/10 text-primary"
+                  )}>
+                    {profile?.accountType || 'Standard'} Member
+                  </Badge>
                   <span className="text-xs font-black text-muted-foreground/60 uppercase tracking-widest">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
                 </div>
                 <h1 className="text-5xl font-black tracking-tight text-[#111827]">{greeting}, {user.displayName?.split(' ')[0] || 'Member'} 👋</h1>
@@ -281,7 +296,10 @@ export default function DashboardPage() {
                   <DropdownMenuContent className="rounded-3xl w-72 p-2 border-muted-foreground/10 shadow-2xl overflow-hidden" align="end">
                     <DropdownMenuLabel className="p-4">
                       <div className="flex flex-col gap-1">
-                        <p className="text-lg font-black leading-none">{user.displayName}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-lg font-black leading-none">{user.displayName}</p>
+                          {getTierIcon(profile?.accountType)}
+                        </div>
                         <p className="text-xs font-medium text-muted-foreground truncate">{user.email}</p>
                       </div>
                     </DropdownMenuLabel>
@@ -289,6 +307,11 @@ export default function DashboardPage() {
                     <Link href="/profile/me">
                       <DropdownMenuItem className="rounded-2xl font-black py-4 px-5 gap-3 cursor-pointer">
                         <User className="w-5 h-5 text-primary" /> View Profile
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/upgrades">
+                      <DropdownMenuItem className="rounded-2xl font-black py-4 px-5 gap-3 cursor-pointer">
+                        <Sparkles className="w-5 h-5 text-orange-500" /> Account Upgrades
                       </DropdownMenuItem>
                     </Link>
                     <DropdownMenuItem className="rounded-2xl font-black py-4 px-5 gap-3 cursor-pointer">
@@ -317,7 +340,7 @@ export default function DashboardPage() {
               <CardContent className="p-12 md:p-16 flex flex-col md:flex-row items-center justify-between gap-12 relative z-10">
                 <div className="space-y-8 text-left max-w-xl">
                   <div className="flex items-center gap-3">
-                    <Badge className="bg-white/20 text-white border-none px-6 py-2 rounded-full font-black text-[11px] uppercase tracking-[0.25em]">Pro Status Active</Badge>
+                    <Badge className="bg-white/20 text-white border-none px-6 py-2 rounded-full font-black text-[11px] uppercase tracking-[0.25em]">{profile?.accountType || 'Standard'} Status Active</Badge>
                   </div>
                   <h2 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9]">Elevate Your <br/>Expertise.</h2>
                   <p className="text-xl text-white/80 font-medium leading-relaxed">Experience Kerala's most advanced work-matching engine. Your next milestone starts here.</p>
@@ -325,13 +348,13 @@ export default function DashboardPage() {
                     <Link href="/jobs">
                       <Button className="bg-white text-primary hover:bg-white/90 rounded-3xl h-16 px-12 font-black text-lg shadow-2xl shadow-black/10 transition-all hover:scale-105 active:scale-95">Explore Hub <ChevronRight className="w-6 h-6 ml-2" /></Button>
                     </Link>
-                    <Link href="/jobs?tab=workers">
-                      <Button variant="ghost" className="text-white hover:bg-white/10 rounded-3xl h-16 px-12 font-black text-lg">Hire Talent</Button>
+                    <Link href="/upgrades">
+                      <Button variant="ghost" className="text-white hover:bg-white/10 rounded-3xl h-16 px-12 font-black text-lg">Account Tiers</Button>
                     </Link>
                   </div>
                 </div>
                 <div className="hidden lg:flex w-64 h-64 bg-white/10 rounded-[4rem] items-center justify-center backdrop-blur-3xl shrink-0 group-hover:scale-110 transition-transform duration-700 border border-white/20 shadow-2xl">
-                  <ShieldCheck className="w-32 h-32 opacity-40 rotate-12" />
+                  {profile?.accountType === 'gold' ? <Crown className="w-32 h-32 opacity-40 rotate-12" /> : <ShieldCheck className="w-32 h-32 opacity-40 rotate-12" />}
                 </div>
               </CardContent>
               <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-white/5 rounded-full blur-[100px]" />
@@ -505,4 +528,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

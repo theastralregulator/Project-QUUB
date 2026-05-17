@@ -65,8 +65,8 @@ export default function JobsPage() {
 
   const workersQuery = useMemoFirebase(() => {
     if (!db) return null;
-    // Fetch all users and filter by quality (skills > 0) client-side for flexibility
-    return query(collection(db, 'users'), limit(50));
+    // Query users ordered by creation date to show new users automatically at top
+    return query(collection(db, 'users'), orderBy('createdAt', 'desc'), limit(50));
   }, [db]);
 
   const { data: rawJobs, loading: jobsLoading } = useCollection(jobsQuery);
@@ -97,12 +97,11 @@ export default function JobsPage() {
   const filteredWorkers = useMemo(() => {
     if (!rawWorkers) return [];
     return rawWorkers.filter(worker => {
-      // QUALITY FILTER: Only show profiles that have at least one skill
-      const hasSkills = worker.skills && Array.isArray(worker.skills) && worker.skills.length > 0;
-      if (!hasSkills) return false;
-
+      // Include all user profiles automatically as requested
       const matchesSearch = worker.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                           worker.skills?.some((s: string) => s.toLowerCase().includes(searchQuery.toLowerCase()));
+                           worker.skills?.some((s: string) => s.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                           worker.bio?.toLowerCase().includes(searchQuery.toLowerCase());
+      
       const matchesLocation = currentLocation === 'Kerala' || worker.location === currentLocation;
       
       return matchesSearch && matchesLocation;
@@ -273,7 +272,7 @@ export default function JobsPage() {
 
           <TabsContent value="workers" className="space-y-6">
             <div className="flex items-center justify-between px-4">
-              <h3 className="text-2xl font-black tracking-tight">Elite Workers <span className="text-muted-foreground font-medium ml-2 text-lg">({filteredWorkers.length})</span></h3>
+              <h3 className="text-2xl font-black tracking-tight">Community Members <span className="text-muted-foreground font-medium ml-2 text-lg">({filteredWorkers.length})</span></h3>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {workersLoading ? [1, 2, 3].map(i => <div key={i} className="h-72 bg-white rounded-[2.5rem] animate-pulse" />) : filteredWorkers.length ? filteredWorkers.map((worker) => (
@@ -296,28 +295,32 @@ export default function JobsPage() {
                         <div className="flex items-center gap-1.5 justify-end text-sm font-black"><Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />{worker.rating?.toFixed(1) || '5.0'}</div>
                       </div>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-2 text-left">
                       <h4 className="text-2xl font-black group-hover:text-primary transition-colors">{worker.name}</h4>
-                      <p className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">{worker.role || 'Elite Professional'}</p>
+                      <p className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">{worker.role || 'Professional'}</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {(worker.skills || []).slice(0, 3).map((skill: string) => (
-                        <Badge key={skill} variant="secondary" className="bg-muted/30 text-[9px] font-black rounded-lg px-3 py-1.5 uppercase tracking-wider border-none">{skill}</Badge>
-                      ))}
+                      {worker.skills && worker.skills.length > 0 ? (
+                        worker.skills.slice(0, 3).map((skill: string) => (
+                          <Badge key={skill} variant="secondary" className="bg-muted/30 text-[9px] font-black rounded-lg px-3 py-1.5 uppercase tracking-wider border-none">{skill}</Badge>
+                        ))
+                      ) : (
+                        <Badge variant="outline" className="text-[9px] font-black rounded-lg px-3 py-1.5 uppercase tracking-wider border-dashed">No skills listed</Badge>
+                      )}
                     </div>
                     <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest pt-2">
                       <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {worker.location || 'Kerala'}</span>
-                      {worker.availabilityStatus === 'available' && <span className="flex items-center gap-1.5 text-emerald-600"><div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />Ready</span>}
+                      {worker.availabilityStatus === 'available' && <span className="flex items-center gap-1.5 text-emerald-600"><div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />Active</span>}
                     </div>
                     <div className="flex items-center gap-3 pt-2">
-                      <Button variant="outline" className="flex-1 rounded-2xl h-14 font-black text-sm border-muted-foreground/10 hover:bg-muted/5 transition-colors">Profile</Button>
-                      <Button onClick={() => router.push(`/messages?hire=${worker.id}`)} className="flex-1 bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-2xl h-14 font-black text-sm shadow-xl shadow-primary/20">Hire Now</Button>
+                      <Button variant="outline" className="flex-1 rounded-2xl h-14 font-black text-sm border-muted-foreground/10 hover:bg-muted/5 transition-colors" onClick={() => router.push(`/profile/${worker.id}`)}>Profile</Button>
+                      <Button onClick={() => router.push(`/messages?hire=${worker.id}`)} className="flex-1 bg-[#6366f1] hover:bg-[#5558e3] text-white rounded-2xl h-14 font-black text-sm shadow-xl shadow-primary/20">Message</Button>
                     </div>
                   </CardContent>
                 </Card>
               )) : (
                 <div className="text-center p-20 bg-white rounded-[2.5rem] border-dashed border-2">
-                  <p className="text-muted-foreground font-bold">No active workers found matching your criteria.</p>
+                  <p className="text-muted-foreground font-bold">No members found matching your search.</p>
                 </div>
               )}
             </div>
@@ -326,7 +329,7 @@ export default function JobsPage() {
 
         <section className="mt-20 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-[3rem] p-12 lg:p-20 text-white overflow-hidden relative">
           <div className="relative z-10 grid lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-8">
+            <div className="space-y-8 text-left">
               <Badge className="bg-white/20 text-white border-none px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-[0.2em]">Smart Matching</Badge>
               <h2 className="text-5xl font-black leading-tight">Need a custom<br/>talent match in {currentLocation}?</h2>
               <p className="text-xl text-white/80 font-medium leading-relaxed max-w-lg">Our AI-powered engine analyzes your profile and project requirements to find the perfect professional match in seconds.</p>

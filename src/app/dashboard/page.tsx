@@ -2,11 +2,12 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import { useUser, useFirestore, useCollection } from '@/firebase';
+import { useUser, useFirestore, useCollection, useAuth } from '@/firebase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   Briefcase, 
   MapPin, 
@@ -29,11 +30,16 @@ import {
   ArrowRight,
   ShieldCheck,
   Star,
-  Sparkles
+  Sparkles,
+  LogOut,
+  Settings,
+  CreditCard
 } from 'lucide-react';
 import { collection, query, limit, orderBy, where, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { signOut } from 'firebase/auth';
 import { useMemoFirebase } from '@/firebase/use-memo-firebase';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { 
   ChartContainer, 
@@ -49,12 +55,16 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function DashboardPage() {
   const { user } = useUser();
   const db = useFirestore();
+  const auth = useAuth();
+  const router = useRouter();
   const { toast } = useToast();
   
   const [mounted, setMounted] = useState(false);
@@ -79,6 +89,17 @@ export default function DashboardPage() {
     setLocation(newLoc);
     localStorage.setItem('quub_location', newLoc);
     toast({ title: "Location Updated", description: `Showing opportunities in ${newLoc}.` });
+  };
+
+  const handleLogout = async () => {
+    if (!auth) return;
+    try {
+      await signOut(auth);
+      toast({ title: "Signed Out", description: "You have been successfully logged out." });
+      router.push('/');
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Logout Error", description: error.message });
+    }
   };
 
   const requestLocation = () => {
@@ -239,10 +260,44 @@ export default function DashboardPage() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button size="icon" className="rounded-2xl h-16 w-16 bg-white border border-muted-foreground/10 shadow-sm text-foreground hover:bg-muted/50 relative transition-all">
-                  <Bell className="w-7 h-7" />
-                  <span className="absolute top-4 right-4 w-3.5 h-3.5 bg-destructive rounded-full border-4 border-white" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="icon" className="rounded-2xl h-16 w-16 bg-white border border-muted-foreground/10 shadow-sm text-foreground hover:bg-muted/50 relative transition-all overflow-hidden p-0">
+                      <Avatar className="w-full h-full rounded-none">
+                        <AvatarImage src={user.photoURL || `https://picsum.photos/seed/${user.uid}/100`} />
+                        <AvatarFallback className="font-black bg-primary/10 text-primary">{user.displayName?.[0]}</AvatarFallback>
+                      </Avatar>
+                      <span className="absolute top-2 right-2 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="rounded-3xl w-72 p-2 border-muted-foreground/10 shadow-2xl overflow-hidden" align="end">
+                    <DropdownMenuLabel className="p-4">
+                      <div className="flex flex-col gap-1">
+                        <p className="text-lg font-black leading-none">{user.displayName}</p>
+                        <p className="text-xs font-medium text-muted-foreground truncate">{user.email}</p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <Link href="/profile/me">
+                      <DropdownMenuItem className="rounded-2xl font-black py-4 px-5 gap-3 cursor-pointer">
+                        <User className="w-5 h-5 text-primary" /> View Profile
+                      </DropdownMenuItem>
+                    </Link>
+                    <DropdownMenuItem className="rounded-2xl font-black py-4 px-5 gap-3 cursor-pointer">
+                      <Settings className="w-5 h-5 text-muted-foreground" /> Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="rounded-2xl font-black py-4 px-5 gap-3 cursor-pointer">
+                      <CreditCard className="w-5 h-5 text-muted-foreground" /> Billing
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={handleLogout}
+                      className="rounded-2xl font-black py-4 px-5 gap-3 cursor-pointer text-destructive focus:bg-destructive/5"
+                    >
+                      <LogOut className="w-5 h-5" /> Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
 

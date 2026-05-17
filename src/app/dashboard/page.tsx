@@ -94,7 +94,6 @@ export default function DashboardPage() {
     if (savedLoc) setLocation(savedLoc);
   }, []);
 
-  // Bootstrap Admin for specific user
   useEffect(() => {
     if (user?.email === 'sabinsaji3900@gmail.com' && profile && profile.role !== 'admin' && db) {
       updateDoc(doc(db, 'users', user.uid), { role: 'admin' });
@@ -142,10 +141,9 @@ export default function DashboardPage() {
     );
   };
 
-  // Improved nearby jobs query: query latest and filter client-side for "Remote" inclusion
   const nearbyJobsQuery = useMemoFirebase(() => {
     if (!db) return null;
-    return query(collection(db, 'jobs'), orderBy('createdAt', 'desc'), limit(10));
+    return query(collection(db, 'jobs'), orderBy('createdAt', 'desc'), limit(20));
   }, [db]);
 
   const trendingJobsQuery = useMemoFirebase(() => {
@@ -158,11 +156,13 @@ export default function DashboardPage() {
 
   const nearbyJobs = useMemo(() => {
     if (!rawNearbyJobs) return [];
-    return rawNearbyJobs.filter(job => 
-      location === 'Kerala' || 
-      job.location === location || 
-      job.location?.toLowerCase() === 'remote'
-    ).slice(0, 4);
+    return rawNearbyJobs.filter(job => {
+      // Global visibility: show all jobs if user location is Kerala or Remote
+      if (location === 'Kerala' || location === 'Remote') return true;
+      
+      // District specific: show district jobs + remote jobs
+      return job.location === location || job.location?.toLowerCase() === 'remote';
+    }).slice(0, 4);
   }, [rawNearbyJobs, location]);
 
   useEffect(() => {
@@ -380,7 +380,7 @@ export default function DashboardPage() {
                       <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center">
                         <MapPin className="w-6 h-6 text-indigo-600" />
                       </div>
-                      <h3 className="text-2xl font-black tracking-tight">Active Near {location}</h3>
+                      <h3 className="text-2xl font-black tracking-tight">Active Hub</h3>
                     </div>
                   </div>
                   <div className="space-y-4">
@@ -404,8 +404,8 @@ export default function DashboardPage() {
                       </Card>
                     )) : (
                       <div className="p-12 text-center bg-white rounded-[2.5rem] border-dashed border-2 border-muted-foreground/10 space-y-4">
-                        <p className="font-black text-muted-foreground/40 text-sm uppercase tracking-widest">No local hits</p>
-                        <Button variant="ghost" onClick={requestLocation} className="text-primary font-black">Retry Search</Button>
+                        <p className="font-black text-muted-foreground/40 text-sm uppercase tracking-widest">No listings found</p>
+                        <Button variant="ghost" onClick={requestLocation} className="text-primary font-black">Refresh Hub</Button>
                       </div>
                     )}
                   </div>

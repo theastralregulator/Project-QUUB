@@ -37,7 +37,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/dropdown-menu";
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function JobsPage() {
@@ -60,7 +60,6 @@ export default function JobsPage() {
 
   const jobsQuery = useMemoFirebase(() => {
     if (!db) return null;
-    // Query the latest jobs
     return query(collection(db, 'jobs'), orderBy('createdAt', 'desc'), limit(100));
   }, [db]);
 
@@ -89,8 +88,9 @@ export default function JobsPage() {
       const matchesCategory = selectedCategory === 'All' || 
                              job.category?.toLowerCase() === selectedCategory.toLowerCase();
 
-      // Inclusive location: show if matches district, or if "Kerala" (show all), or if job is "Remote"
+      // Updated visibility logic: Kerala and Remote settings show all accounts' jobs
       const matchesLocation = currentLocation === 'Kerala' || 
+                             currentLocation === 'Remote' ||
                              job.location === currentLocation || 
                              job.location?.toLowerCase() === 'remote';
       
@@ -106,7 +106,7 @@ export default function JobsPage() {
                            worker.skills?.some((s: string) => s.toLowerCase().includes(searchQuery.toLowerCase())) ||
                            worker.bio?.toLowerCase().includes(searchQuery.toLowerCase());
       
-      const matchesLocation = currentLocation === 'Kerala' || worker.location === currentLocation;
+      const matchesLocation = currentLocation === 'Kerala' || currentLocation === 'Remote' || worker.location === currentLocation;
       
       return matchesSearch && matchesLocation;
     });
@@ -266,7 +266,7 @@ export default function JobsPage() {
                 </Card>
               )) : (
                 <div className="text-center p-20 bg-white rounded-[2.5rem] border-dashed border-2">
-                  <p className="text-muted-foreground font-bold">No jobs found in {currentLocation}. Try adjusting your filters!</p>
+                  <p className="text-muted-foreground font-bold">No jobs found. Try adjusting your filters!</p>
                 </div>
               )}
             </div>
@@ -333,7 +333,7 @@ export default function JobsPage() {
           <div className="relative z-10 grid lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-8 text-left">
               <Badge className="bg-white/20 text-white border-none px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-[0.2em]">Smart Matching</Badge>
-              <h2 className="text-5xl font-black leading-tight">Need a custom<br/>talent match in {currentLocation}?</h2>
+              <h2 className="text-5xl font-black leading-tight">Need a custom<br/>talent match?</h2>
               <p className="text-xl text-white/80 font-medium leading-relaxed max-w-lg">Our AI-powered engine analyzes your profile and project requirements to find the perfect professional match in seconds.</p>
               <Button className="bg-white text-primary hover:bg-white/90 rounded-2xl h-16 px-12 font-black text-lg shadow-2xl shadow-black/20 gap-3">
                 Try AI Matcher <ArrowRight className="w-6 h-6" />

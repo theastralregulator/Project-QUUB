@@ -27,7 +27,7 @@
     },
     "Job": {
       "title": "Job",
-      "description": "A work opportunity posted by an employer.",
+      "description": "A work opportunity posted by an employer. Publicly readable.",
       "type": "object",
       "properties": {
         "title": { "type": "string" },
@@ -100,7 +100,7 @@
     },
     "/jobs/{jobId}": {
       "schema": "Job",
-      "description": "Storage for job postings."
+      "description": "Storage for job postings. Accessible to all users for browsing."
     },
     "/applications/{applicationId}": {
       "schema": "Application",

@@ -5,25 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Search, Send, Plus, MoreVertical, Image as ImageIcon, Mic, Paperclip, CheckCheck, Smile } from 'lucide-react';
+import { Search, Send, Plus, MoreVertical, Image as ImageIcon, Mic, Paperclip, CheckCheck, Smile, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function MessagesPage() {
-  const [activeChat, setActiveChat] = useState<number | null>(0);
+  const [activeChat, setActiveChat] = useState<number | null>(null);
 
-  const contacts = [
-    { name: "Sarah Jenkins", lastMsg: "The designs look amazing! Can we...", time: "2m ago", status: "online", unread: 2 },
-    { name: "Alex Rivera", lastMsg: "Sent the contract for your review.", time: "1h ago", status: "offline", unread: 0 },
-    { name: "GrowthX Support", lastMsg: "Your payment was processed.", time: "4h ago", status: "online", unread: 0 },
-    { name: "Marcus Thorne", lastMsg: "Let's hop on a call tomorrow.", time: "1d ago", status: "offline", unread: 0 },
-  ];
-
-  const messages = [
-    { text: "Hi! I just finished the initial concepts for the logo redesign.", sender: "me", time: "10:30 AM", status: "read" },
-    { text: "The designs look amazing! Can we try a darker purple for the primary brand?", sender: "them", time: "10:35 AM", status: "read" },
-    { text: "Sure thing! I'll update the style guide and send it over in an hour.", sender: "me", time: "10:36 AM", status: "read" },
-    { text: "Perfect, thanks so much for the quick turnaround.", sender: "them", time: "10:40 AM", status: "read" },
-  ];
+  // Demo data removed - ready for real Firestore integration
+  const contacts: any[] = [];
+  const messages: any[] = [];
 
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-white md:container md:mx-auto md:my-4 md:rounded-[2.5rem] md:shadow-2xl md:border">
@@ -45,43 +35,52 @@ export default function MessagesPage() {
           </div>
         </div>
         <ScrollArea className="flex-1">
-          <div className="divide-y divide-muted/10">
-            {contacts.map((contact, i) => (
-              <button
-                key={i}
-                onClick={() => setActiveChat(i)}
-                className={cn(
-                  "w-full p-5 flex gap-4 hover:bg-white transition-all text-left relative group",
-                  activeChat === i && "bg-white shadow-inner"
-                )}
-              >
-                <div className="relative">
-                  <Avatar className="w-14 h-14 rounded-2xl ring-2 ring-white shadow-md">
-                    <AvatarImage src={`https://picsum.photos/seed/msg${i}/200`} />
-                    <AvatarFallback className="font-bold">{contact.name[0]}</AvatarFallback>
-                  </Avatar>
-                  {contact.status === 'online' && (
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-4 border-white shadow-sm" />
+          {contacts.length > 0 ? (
+            <div className="divide-y divide-muted/10">
+              {contacts.map((contact, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveChat(i)}
+                  className={cn(
+                    "w-full p-5 flex gap-4 hover:bg-white transition-all text-left relative group",
+                    activeChat === i && "bg-white shadow-inner"
                   )}
-                </div>
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <div className="flex justify-between items-baseline mb-0.5">
-                    <h3 className="font-black text-base truncate">{contact.name}</h3>
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase">{contact.time}</span>
+                >
+                  <div className="relative">
+                    <Avatar className="w-14 h-14 rounded-2xl ring-2 ring-white shadow-md">
+                      <AvatarImage src={`https://picsum.photos/seed/msg${i}/200`} />
+                      <AvatarFallback className="font-bold">{contact.name[0]}</AvatarFallback>
+                    </Avatar>
+                    {contact.status === 'online' && (
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-4 border-white shadow-sm" />
+                    )}
                   </div>
-                  <p className="text-sm text-muted-foreground truncate font-medium">{contact.lastMsg}</p>
-                </div>
-                {contact.unread > 0 && (
-                  <div className="absolute right-5 top-1/2 -translate-y-1/2 w-6 h-6 bg-primary text-white text-[10px] font-black rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-                    {contact.unread}
+                  <div className="flex-1 min-w-0 flex flex-col justify-center">
+                    <div className="flex justify-between items-baseline mb-0.5">
+                      <h3 className="font-black text-base truncate">{contact.name}</h3>
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase">{contact.time}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground truncate font-medium">{contact.lastMsg}</p>
                   </div>
-                )}
-                {activeChat === i && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
-                )}
-              </button>
-            ))}
-          </div>
+                  {contact.unread > 0 && (
+                    <div className="absolute right-5 top-1/2 -translate-y-1/2 w-6 h-6 bg-primary text-white text-[10px] font-black rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+                      {contact.unread}
+                    </div>
+                  )}
+                  {activeChat === i && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
+                  )}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="p-12 text-center space-y-4">
+              <div className="w-16 h-16 bg-muted/30 rounded-2xl flex items-center justify-center mx-auto text-muted-foreground">
+                <MessageSquare className="w-8 h-8" />
+              </div>
+              <p className="text-sm font-black text-muted-foreground uppercase tracking-widest">No conversations yet</p>
+            </div>
+          )}
         </ScrollArea>
       </aside>
 
@@ -92,12 +91,12 @@ export default function MessagesPage() {
       )}>
         {activeChat === null ? (
           <div className="text-center space-y-6 max-w-sm">
-            <div className="w-24 h-24 rounded-[2rem] bg-primary/10 flex items-center justify-center mx-auto text-primary animate-pulse">
+            <div className="w-24 h-24 rounded-[2rem] bg-primary/10 flex items-center justify-center mx-auto text-primary">
               <MessageSquare className="w-12 h-12" />
             </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-black">Your Elite Workspace</h2>
-              <p className="text-muted-foreground font-medium">Select a conversation to start collaborating with your team or clients.</p>
+            <div className="space-y-2 px-6">
+              <h2 className="text-2xl font-black">Your Workspace</h2>
+              <p className="text-muted-foreground font-medium leading-relaxed">Select a conversation from the list to start collaborating with clients or team members.</p>
             </div>
           </div>
         ) : (
@@ -115,12 +114,12 @@ export default function MessagesPage() {
                 <div className="relative">
                   <Avatar className="w-12 h-12 rounded-2xl shadow-md border-2 border-white">
                     <AvatarImage src={`https://picsum.photos/seed/msg${activeChat}/200`} />
-                    <AvatarFallback className="font-bold">{contacts[activeChat].name[0]}</AvatarFallback>
+                    <AvatarFallback className="font-bold">{contacts[activeChat]?.name?.[0] || 'U'}</AvatarFallback>
                   </Avatar>
                   <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-white" />
                 </div>
                 <div>
-                  <h3 className="font-black text-lg leading-tight">{contacts[activeChat].name}</h3>
+                  <h3 className="font-black text-lg leading-tight">{contacts[activeChat]?.name}</h3>
                   <div className="flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
                     <span className="text-[10px] text-green-500 font-black uppercase tracking-widest">Active Now</span>
@@ -134,31 +133,39 @@ export default function MessagesPage() {
 
             <ScrollArea className="flex-1 p-6 bg-muted/5">
               <div className="space-y-8">
-                <div className="text-center">
-                  <span className="text-[10px] uppercase tracking-[0.2em] font-black text-muted-foreground bg-white border px-4 py-1.5 rounded-full shadow-sm">Today, April 12</span>
-                </div>
-                {messages.map((msg, i) => (
-                  <div 
-                    key={i} 
-                    className={cn(
-                      "flex flex-col max-w-[85%] md:max-w-[70%] animate-in fade-in slide-in-from-bottom-2",
-                      msg.sender === 'me' ? "ml-auto items-end" : "items-start"
-                    )}
-                  >
-                    <div className={cn(
-                      "p-5 rounded-3xl text-sm font-medium shadow-md leading-relaxed",
-                      msg.sender === 'me' 
-                        ? "bg-primary text-white rounded-tr-none shadow-primary/20" 
-                        : "bg-white text-foreground rounded-tl-none border border-muted/50"
-                    )}>
-                      {msg.text}
+                {messages.length > 0 ? (
+                  <>
+                    <div className="text-center">
+                      <span className="text-[10px] uppercase tracking-[0.2em] font-black text-muted-foreground bg-white border px-4 py-1.5 rounded-full shadow-sm">Today</span>
                     </div>
-                    <div className="flex items-center gap-2 mt-2 px-1">
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase">{msg.time}</span>
-                      {msg.sender === 'me' && <CheckCheck className="w-3 h-3 text-primary" />}
-                    </div>
+                    {messages.map((msg, i) => (
+                      <div 
+                        key={i} 
+                        className={cn(
+                          "flex flex-col max-w-[85%] md:max-w-[70%] animate-in fade-in slide-in-from-bottom-2",
+                          msg.sender === 'me' ? "ml-auto items-end" : "items-start"
+                        )}
+                      >
+                        <div className={cn(
+                          "p-5 rounded-3xl text-sm font-medium shadow-md leading-relaxed",
+                          msg.sender === 'me' 
+                            ? "bg-primary text-white rounded-tr-none shadow-primary/20" 
+                            : "bg-white text-foreground rounded-tl-none border border-muted/50"
+                        )}>
+                          {msg.text}
+                        </div>
+                        <div className="flex items-center gap-2 mt-2 px-1">
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase">{msg.time}</span>
+                          {msg.sender === 'me' && <CheckCheck className="w-3 h-3 text-primary" />}
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <div className="h-full flex items-center justify-center p-20 text-center">
+                    <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">No messages in this chat yet</p>
                   </div>
-                ))}
+                )}
               </div>
             </ScrollArea>
 
@@ -184,24 +191,5 @@ export default function MessagesPage() {
         )}
       </main>
     </div>
-  );
-}
-
-function MessageSquare(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
   );
 }

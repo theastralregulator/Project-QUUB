@@ -1,7 +1,8 @@
+
 "use client"
 
 import { useState, useEffect } from 'react';
-import { useUser, useFirestore, useCollection, useAuth } from '@/firebase';
+import { useUser, useFirestore, useCollection, useAuth, useDoc } from '@/firebase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -32,7 +33,8 @@ import {
   Sparkles,
   LogOut,
   Settings,
-  CreditCard
+  CreditCard,
+  ShieldAlert
 } from 'lucide-react';
 import { collection, query, limit, orderBy, where, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
@@ -72,6 +74,13 @@ export default function DashboardPage() {
   const [isLocating, setIsLocating] = useState(false);
   const [recommendations, setRecommendations] = useState<RecommendationOutput | null>(null);
   const [isRecommending, setIsRecommending] = useState(false);
+
+  const profileRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return doc(db, 'users', user.uid);
+  }, [db, user]);
+
+  const { data: profile } = useDoc(profileRef);
 
   useEffect(() => {
     setMounted(true);
@@ -285,6 +294,13 @@ export default function DashboardPage() {
                     <DropdownMenuItem className="rounded-2xl font-black py-4 px-5 gap-3 cursor-pointer">
                       <Settings className="w-5 h-5 text-muted-foreground" /> Settings
                     </DropdownMenuItem>
+                    {profile?.role === 'admin' && (
+                      <Link href="/admin">
+                        <DropdownMenuItem className="rounded-2xl font-black py-4 px-5 gap-3 cursor-pointer text-orange-600 focus:bg-orange-50 focus:text-orange-700">
+                          <ShieldAlert className="w-5 h-5" /> Admin Panel
+                        </DropdownMenuItem>
+                      </Link>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                       onClick={handleLogout}
@@ -489,3 +505,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

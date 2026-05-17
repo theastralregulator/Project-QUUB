@@ -96,7 +96,7 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-3 group">
           <div className="w-10 h-10 group-hover:scale-105 transition-transform shrink-0">
             <svg viewBox="0 0 100 100" className="w-full h-full text-[#6366f1] drop-shadow-md" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path fillRule="evenodd" clipRule="evenodd" d="M25 0C11.1929 0 0 11.1929 0 25V75C0 88.8071 11.1929 100 25 100H65L80 115V100H85C98.8071 100 110 88.8071 110 75V25C110 11.1929 98.8071 0 85 0H25ZM30 30H80V70H30V30Z" />
+              <path fillRule="evenodd" clipRule="evenodd" d="M20 0C8.954 0 0 8.954 0 20V80C0 91.046 8.954 100 20 100H60L85 115V100H80C91.046 100 100 91.046 100 80V20C100 8.954 91.046 0 80 0H20ZM25 25V75H55L75 55V25H25Z" />
             </svg>
           </div>
           <span className="text-2xl font-headline font-black text-[#111827] tracking-tight">Quub</span>
@@ -109,7 +109,7 @@ export function Navbar() {
                 <Link href="/dashboard" className={cn("text-sm font-black transition-colors uppercase tracking-widest", pathname === '/dashboard' ? "text-[#6366f1]" : "text-muted-foreground hover:text-foreground")}>Dashboard</Link>
                 <Link href="/jobs" className={cn("text-sm font-black transition-colors uppercase tracking-widest", pathname === '/jobs' ? "text-[#6366f1]" : "text-muted-foreground hover:text-foreground")}>Jobs Hub</Link>
                 <Link href="/messages" className={cn("text-sm font-black transition-colors uppercase tracking-widest", pathname === '/messages' ? "text-[#6366f1]" : "text-muted-foreground hover:text-foreground")}>Messages</Link>
-                {profile?.role === 'admin' && (
+                {(profile?.role === 'admin' || user.email === 'sabinsaji3900@gmail.com') && (
                   <Link href="/admin" className={cn("text-sm font-black transition-colors uppercase tracking-widest flex items-center gap-1", pathname === '/admin' ? "text-orange-600" : "text-orange-500 hover:text-orange-600")}>
                     <ShieldAlert className="w-4 h-4" /> Admin
                   </Link>

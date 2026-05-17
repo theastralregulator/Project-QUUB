@@ -28,7 +28,7 @@ import {
   Zap,
   ArrowRight
 } from 'lucide-react';
-import Link from 'link';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -88,7 +88,6 @@ export default function JobsPage() {
       const matchesCategory = selectedCategory === 'All' || 
                              job.category?.toLowerCase() === selectedCategory.toLowerCase();
 
-      // Updated visibility logic: Kerala and Remote settings show all accounts' jobs
       const matchesLocation = currentLocation === 'Kerala' || 
                              currentLocation === 'Remote' ||
                              job.location === currentLocation || 

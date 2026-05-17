@@ -6,7 +6,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Crown, Star, Zap, Loader2, ArrowRight } from 'lucide-react';
+import { Check, Crown, Star, Zap, Loader2, ArrowRight, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useMemoFirebase } from '@/firebase/use-memo-firebase';
 import { cn } from '@/lib/utils';
@@ -27,6 +27,14 @@ export default function UpgradesPage() {
   const { data: profile } = useDoc(profileRef);
 
   const handleUpgrade = async (tier: string) => {
+    if (tier !== 'standard') {
+      toast({
+        title: "Coming Soon",
+        description: `${tier.charAt(0).toUpperCase() + tier.slice(1)} membership will be available in the next update.`,
+      });
+      return;
+    }
+    
     if (!db || !user) return;
     
     setUpgradingTo(tier);
@@ -35,13 +43,13 @@ export default function UpgradesPage() {
         accountType: tier
       });
       toast({
-        title: "Account Upgraded!",
-        description: `You are now a ${tier.charAt(0).toUpperCase() + tier.slice(1)} member.`,
+        title: "Plan Updated",
+        description: "You have been switched to the Standard plan.",
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Upgrade Failed",
+        title: "Update Failed",
         description: "Please try again later.",
       });
     } finally {
@@ -57,6 +65,7 @@ export default function UpgradesPage() {
       description: 'The essential Quub experience.',
       icon: Zap,
       color: 'bg-muted/30 text-muted-foreground',
+      isComingSoon: false,
       features: [
         'Apply to basic jobs',
         'Standard profile visibility',
@@ -72,6 +81,7 @@ export default function UpgradesPage() {
       icon: Star,
       color: 'bg-slate-100 text-slate-600',
       badge: 'Most Popular',
+      isComingSoon: true,
       features: [
         'Priority job applications',
         'Featured profile badge',
@@ -87,6 +97,7 @@ export default function UpgradesPage() {
       description: 'The elite workspace experience.',
       icon: Crown,
       color: 'bg-yellow-50 text-yellow-600',
+      isComingSoon: true,
       features: [
         'Early access to elite jobs',
         'Top placement in search',
@@ -117,13 +128,13 @@ export default function UpgradesPage() {
           <Badge className="bg-primary/10 text-primary border-none font-black text-[10px] uppercase tracking-widest px-4 py-1.5 rounded-full">Membership Hub</Badge>
           <h1 className="text-5xl md:text-7xl font-black tracking-tight text-[#111827]">Supercharge Your <br/>Work Life.</h1>
           <p className="text-xl text-muted-foreground font-medium max-w-2xl mx-auto leading-relaxed">
-            Choose the tier that matches your ambition. Get exclusive access to the best projects and talent in Kerala.
+            Choose the tier that matches your ambition. Premium features and elite access are arriving soon.
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           {tiers.map((tier) => {
-            const isCurrent = profile?.accountType === tier.id;
+            const isCurrent = (profile?.accountType || 'standard') === tier.id;
             const Icon = tier.icon;
             
             return (
@@ -134,11 +145,18 @@ export default function UpgradesPage() {
                   isCurrent && "ring-4 ring-primary ring-offset-4"
                 )}
               >
-                {tier.badge && (
-                  <div className="absolute top-8 right-8">
-                    <Badge className="bg-[#6366f1] text-white border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">
-                      {tier.badge}
-                    </Badge>
+                {(tier.badge || tier.isComingSoon) && (
+                  <div className="absolute top-8 right-8 flex gap-2">
+                    {tier.isComingSoon && (
+                      <Badge className="bg-orange-100 text-orange-600 border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">
+                        Coming Soon
+                      </Badge>
+                    )}
+                    {tier.badge && (
+                      <Badge className="bg-[#6366f1] text-white border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">
+                        {tier.badge}
+                      </Badge>
+                    )}
                   </div>
                 )}
                 
@@ -167,22 +185,31 @@ export default function UpgradesPage() {
                     ))}
                   </div>
 
-                  <Button 
-                    onClick={() => handleUpgrade(tier.id)}
-                    disabled={isCurrent || upgradingTo !== null}
-                    className={cn(
-                      "w-full h-16 rounded-2xl font-black text-lg transition-all",
-                      isCurrent ? "bg-muted text-muted-foreground cursor-default" : "bg-primary shadow-xl shadow-primary/20 hover:scale-[1.02]"
-                    )}
-                  >
-                    {upgradingTo === tier.id ? (
-                      <Loader2 className="w-6 h-6 animate-spin" />
-                    ) : isCurrent ? (
-                      "Current Plan"
-                    ) : (
-                      `Upgrade to ${tier.name}`
-                    )}
-                  </Button>
+                  {tier.isComingSoon ? (
+                    <Button 
+                      disabled
+                      className="w-full h-16 rounded-2xl font-black text-lg bg-muted text-muted-foreground cursor-not-allowed border-dashed border-2 flex gap-2"
+                    >
+                      <Lock className="w-5 h-5" /> Coming Soon
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={() => handleUpgrade(tier.id)}
+                      disabled={isCurrent || upgradingTo !== null}
+                      className={cn(
+                        "w-full h-16 rounded-2xl font-black text-lg transition-all",
+                        isCurrent ? "bg-muted text-muted-foreground cursor-default" : "bg-primary shadow-xl shadow-primary/20 hover:scale-[1.02]"
+                      )}
+                    >
+                      {upgradingTo === tier.id ? (
+                        <Loader2 className="w-6 h-6 animate-spin" />
+                      ) : isCurrent ? (
+                        "Current Plan"
+                      ) : (
+                        `Select ${tier.name}`
+                      )}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             );

@@ -71,10 +71,11 @@ export default function JobsPage() {
   const { data: rawJobs, loading: jobsLoading } = useCollection(jobsQuery);
   const { data: rawWorkers, loading: workersLoading } = useCollection(workersQuery);
 
-  const keralaLocations = [
-    "Kochi", "Trivandrum", "Kozhikode", "Thrissur", "Kollam", 
+  const locations = [
+    "Kerala", "Kochi", "Trivandrum", "Kozhikode", "Thrissur", "Kollam", 
     "Alappuzha", "Palakkad", "Malappuram", "Kannur", "Kottayam", 
-    "Idukki", "Wayanad", "Pathanamthitta", "Kasaragod", "Remote"
+    "Idukki", "Wayanad", "Pathanamthitta", "Kasaragod", "Tamil Nadu", 
+    "Karnataka", "Maharashtra", "Delhi", "Remote"
   ];
 
   const filteredJobs = useMemo(() => {
@@ -84,8 +85,7 @@ export default function JobsPage() {
                            job.description?.toLowerCase().includes(searchQuery.toLowerCase());
       
       const matchesCategory = selectedCategory === 'All' || 
-                             job.category?.toLowerCase() === selectedCategory.toLowerCase() ||
-                             (selectedCategory === 'Remote' && job.type === 'remote');
+                             job.category?.toLowerCase() === selectedCategory.toLowerCase();
 
       const matchesLocation = currentLocation === 'Kerala' || job.location === currentLocation;
       
@@ -192,9 +192,9 @@ export default function JobsPage() {
                         All Kerala
                       </DropdownMenuItem>
                       <div className="h-px bg-muted my-1" />
-                      {keralaLocations.map(city => (
-                        <DropdownMenuItem key={city} onClick={() => setCurrentLocation(city)} className={cn("rounded-xl font-bold py-3 px-4", currentLocation === city && "bg-primary/5 text-primary")}>
-                          {city}
+                      {locations.map(loc => (
+                        <DropdownMenuItem key={loc} onClick={() => setCurrentLocation(loc)} className={cn("rounded-xl font-bold py-3 px-4", currentLocation === loc && "bg-primary/5 text-primary")}>
+                          {loc}
                         </DropdownMenuItem>
                       ))}
                     </ScrollArea>

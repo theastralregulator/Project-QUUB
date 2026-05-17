@@ -25,7 +25,6 @@ export function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [location, setLocation] = useState<string>('Remote');
 
-  // Fetch current user's profile to check role for admin link
   const profileRef = useMemoFirebase(() => {
     if (!db || !user) return null;
     return doc(db, 'users', user.uid);
@@ -50,10 +49,11 @@ export function Navbar() {
     localStorage.setItem('quub_location', newLoc);
   };
 
-  const keralaLocations = [
-    "Kochi", "Trivandrum", "Kozhikode", "Thrissur", "Kollam", 
+  const locations = [
+    "Kerala", "Kochi", "Trivandrum", "Kozhikode", "Thrissur", "Kollam", 
     "Alappuzha", "Palakkad", "Malappuram", "Kannur", "Kottayam", 
-    "Idukki", "Wayanad", "Pathanamthitta", "Kasaragod", "Remote"
+    "Idukki", "Wayanad", "Pathanamthitta", "Kasaragod", "Tamil Nadu", 
+    "Karnataka", "Maharashtra", "Delhi", "Remote"
   ];
 
   if (!mounted) return (
@@ -119,9 +119,9 @@ export function Navbar() {
                         <Navigation className="w-4 h-4 text-primary" /> Global / Remote
                       </DropdownMenuItem>
                       <div className="h-px bg-muted my-1" />
-                      {keralaLocations.map(city => (
-                        <DropdownMenuItem key={city} onClick={() => updateLocation(city)} className={cn("rounded-xl font-bold py-3 px-4", location === city && "bg-primary/5 text-primary")}>
-                          {city}
+                      {locations.map(loc => (
+                        <DropdownMenuItem key={loc} onClick={() => updateLocation(loc)} className={cn("rounded-xl font-bold py-3 px-4", location === loc && "bg-primary/5 text-primary")}>
+                          {loc}
                         </DropdownMenuItem>
                       ))}
                     </ScrollArea>

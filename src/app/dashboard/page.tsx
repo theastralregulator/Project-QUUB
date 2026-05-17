@@ -28,7 +28,8 @@ import {
   CheckCircle2,
   ArrowRight,
   ShieldCheck,
-  Star
+  Star,
+  Sparkles
 } from 'lucide-react';
 import { collection, query, limit, orderBy, where, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useMemoFirebase } from '@/firebase/use-memo-firebase';
@@ -88,8 +89,6 @@ export default function DashboardPage() {
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        // In a real live app, we would reverse geocode here. 
-        // For now, we simulate finding a Kerala district.
         const mockCity = "Kochi"; 
         updateLocation(mockCity);
         setIsLocating(false);
@@ -107,6 +106,9 @@ export default function DashboardPage() {
 
   const nearbyJobsQuery = useMemoFirebase(() => {
     if (!db) return null;
+    if (location === 'Kerala' || location === 'Remote') {
+        return query(collection(db, 'jobs'), orderBy('createdAt', 'desc'), limit(4));
+    }
     return query(
       collection(db, 'jobs'), 
       where('location', '==', location), 
@@ -192,10 +194,11 @@ export default function DashboardPage() {
     toast({ title: "Application Sent!", description: `Success! You applied for ${job.title}.` });
   };
 
-  const keralaLocations = [
-    "Kochi", "Trivandrum", "Kozhikode", "Thrissur", "Kollam", 
+  const locations = [
+    "Kerala", "Kochi", "Trivandrum", "Kozhikode", "Thrissur", "Kollam", 
     "Alappuzha", "Palakkad", "Malappuram", "Kannur", "Kottayam", 
-    "Idukki", "Wayanad", "Pathanamthitta", "Kasaragod", "Remote"
+    "Idukki", "Wayanad", "Pathanamthitta", "Kasaragod", "Tamil Nadu", 
+    "Karnataka", "Maharashtra", "Delhi", "Remote"
   ];
 
   return (
@@ -204,7 +207,6 @@ export default function DashboardPage() {
         <div className="grid lg:grid-cols-12 gap-10">
           
           <div className="lg:col-span-8 space-y-10">
-            {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
@@ -228,9 +230,9 @@ export default function DashboardPage() {
                         <Navigation className="w-5 h-5" /> Find Me (GPS)
                       </DropdownMenuItem>
                       <div className="h-px bg-muted my-2 mx-3" />
-                      {keralaLocations.map(city => (
-                        <DropdownMenuItem key={city} onClick={() => updateLocation(city)} className={cn("rounded-2xl font-bold py-4 px-5 transition-all", location === city ? "bg-primary text-white" : "hover:bg-muted/30")}>
-                          {city}
+                      {locations.map(loc => (
+                        <DropdownMenuItem key={loc} onClick={() => updateLocation(loc)} className={cn("rounded-2xl font-bold py-4 px-5 transition-all", location === loc ? "bg-primary text-white" : "hover:bg-muted/30")}>
+                          {loc}
                         </DropdownMenuItem>
                       ))}
                     </ScrollArea>
@@ -244,7 +246,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Banner Section */}
             <Card className="border-none shadow-none rounded-[3.5rem] bg-gradient-to-br from-[#6366f1] to-[#a855f7] text-white overflow-hidden relative group">
               <CardContent className="p-12 md:p-16 flex flex-col md:flex-row items-center justify-between gap-12 relative z-10">
                 <div className="space-y-8 text-left max-w-xl">
@@ -270,9 +271,7 @@ export default function DashboardPage() {
               <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full blur-2xl" />
             </Card>
 
-            {/* Main Content Grid */}
             <div className="grid md:grid-cols-2 gap-8">
-               {/* Nearby Section */}
                <div className="space-y-6">
                   <div className="flex items-center justify-between px-2">
                     <div className="flex items-center gap-3">
@@ -310,7 +309,6 @@ export default function DashboardPage() {
                   </div>
                </div>
 
-               {/* AI Recommendations */}
                <div className="space-y-6">
                   <div className="flex items-center gap-3 px-2">
                     <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center">
@@ -342,9 +340,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Sidebar Section */}
           <div className="lg:col-span-4 space-y-10">
-            {/* Quick Stats Grid */}
             <div className="grid grid-cols-2 gap-5">
               {[
                 { label: "Active Jobs", value: "24k+", icon: Briefcase, color: "text-indigo-600 bg-indigo-50" },
@@ -366,7 +362,6 @@ export default function DashboardPage() {
               ))}
             </div>
 
-            {/* Performance Chart */}
             <Card className="border-none shadow-sm rounded-[3rem] bg-white overflow-hidden">
               <CardHeader className="p-10 pb-0">
                 <div className="flex items-center justify-between">
@@ -389,7 +384,6 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            {/* Recent Global Feed */}
             <div className="space-y-6">
               <div className="flex items-center justify-between px-2">
                 <h3 className="text-2xl font-black tracking-tight">Global Hub</h3>
@@ -414,7 +408,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Tip Section */}
             <Card className="border-none shadow-none rounded-[3rem] bg-gradient-to-br from-[#E6E9FF] to-[#F0F2FF] overflow-hidden relative">
               <CardContent className="p-12 space-y-8 relative z-10">
                 <div className="flex items-center gap-5">

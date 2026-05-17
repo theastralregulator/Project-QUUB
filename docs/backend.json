@@ -59,6 +59,20 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["reportedBy", "targetId", "reason"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "A notification for a user.",
+      "type": "object",
+      "properties": {
+        "recipientId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "type": "string", "enum": ["info", "success", "warning", "error"] },
+        "read": { "type": "boolean", "default": false },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["recipientId", "title", "message"]
     }
   },
   "auth": {
@@ -76,6 +90,10 @@
     "/reports/{reportId}": {
       "schema": "Report",
       "description": "Storage for moderation reports."
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "Storage for user notifications."
     }
   }
 }

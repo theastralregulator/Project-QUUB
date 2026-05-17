@@ -4,8 +4,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { useUser, useFirestore, useDoc } from '@/firebase';
-import { Bell, MapPin, ChevronDown, Search, Navigation, ShieldAlert } from 'lucide-react';
+import { useUser, useFirestore, useDoc, useCollection } from '@/firebase';
+import { Bell, MapPin, ChevronDown, Search, Navigation, ShieldAlert, CheckCircle2, Clock } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
@@ -13,9 +13,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { doc } from 'firebase/firestore';
+import { doc, query, collection, where, orderBy, limit, updateDoc } from 'firebase/firestore';
 import { useMemoFirebase } from '@/firebase/use-memo-firebase';
 
 export function Navbar() {
@@ -32,6 +34,20 @@ export function Navbar() {
 
   const { data: profile } = useDoc(profileRef);
 
+  // Notifications Query
+  const notificationsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(
+      collection(db, 'notifications'),
+      where('recipientId', '==', user.uid),
+      orderBy('createdAt', 'desc'),
+      limit(10)
+    );
+  }, [db, user]);
+
+  const { data: notifications } = useCollection(notificationsQuery);
+  const unreadCount = notifications?.filter(n => !n.read).length || 0;
+
   useEffect(() => {
     setMounted(true);
     const checkLocation = () => {
@@ -47,6 +63,15 @@ export function Navbar() {
   const updateLocation = (newLoc: string) => {
     setLocation(newLoc);
     localStorage.setItem('quub_location', newLoc);
+  };
+
+  const handleMarkAsRead = async (notificationId: string) => {
+    if (!db) return;
+    try {
+      await updateDoc(doc(db, 'notifications', notificationId), { read: true });
+    } catch (e) {
+      console.error("Error marking notification as read", e);
+    }
   };
 
   const locations = [
@@ -93,10 +118,61 @@ export function Navbar() {
                 <Button variant="ghost" size="icon" className="rounded-2xl relative bg-muted/20 hover:bg-muted/40 w-12 h-12 transition-all">
                   <Search className="w-5 h-5 text-muted-foreground" />
                 </Button>
-                <Button variant="ghost" size="icon" className="rounded-2xl relative bg-muted/20 hover:bg-muted/40 w-12 h-12 transition-all">
-                  <Bell className="w-5 h-5 text-muted-foreground" />
-                  <span className="absolute top-1 right-1 w-5 h-5 bg-[#6366f1] text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white font-black">3</span>
-                </Button>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="rounded-2xl relative bg-muted/20 hover:bg-muted/40 w-12 h-12 transition-all">
+                      <Bell className={cn("w-5 h-5 transition-colors", unreadCount > 0 ? "text-primary" : "text-muted-foreground")} />
+                      {unreadCount > 0 && (
+                        <span className="absolute top-1 right-1 w-5 h-5 bg-[#6366f1] text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white font-black animate-in fade-in zoom-in">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-80 rounded-3xl p-2 border-muted-foreground/10 shadow-2xl">
+                    <DropdownMenuLabel className="px-4 py-3 flex items-center justify-between">
+                      <span className="font-black text-sm uppercase tracking-widest">Notifications</span>
+                      {unreadCount > 0 && <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-black">{unreadCount} New</span>}
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <ScrollArea className="h-80">
+                      {notifications && notifications.length > 0 ? (
+                        <div className="space-y-1">
+                          {notifications.map((notif) => (
+                            <DropdownMenuItem 
+                              key={notif.id} 
+                              onClick={() => handleMarkAsRead(notif.id)}
+                              className={cn(
+                                "flex flex-col items-start gap-1 p-4 rounded-2xl cursor-pointer transition-colors",
+                                !notif.read ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-muted/30"
+                              )}
+                            >
+                              <div className="flex items-center justify-between w-full">
+                                <span className={cn("font-black text-sm", !notif.read ? "text-primary" : "text-foreground")}>{notif.title}</span>
+                                {!notif.read && <div className="w-2 h-2 bg-primary rounded-full" />}
+                              </div>
+                              <p className="text-xs text-muted-foreground font-medium line-clamp-2">{notif.message}</p>
+                              <div className="flex items-center gap-1.5 mt-1 text-[9px] font-bold text-muted-foreground/60 uppercase tracking-tighter">
+                                <Clock className="w-3 h-3" /> {notif.createdAt?.seconds ? new Date(notif.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
+                              </div>
+                            </DropdownMenuItem>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-12 text-center space-y-3">
+                          <div className="w-12 h-12 bg-muted/30 rounded-2xl flex items-center justify-center text-muted-foreground">
+                            <CheckCircle2 className="w-6 h-6" />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="font-black text-sm">All caught up!</p>
+                            <p className="text-[10px] font-medium text-muted-foreground">No new notifications at the moment.</p>
+                          </div>
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

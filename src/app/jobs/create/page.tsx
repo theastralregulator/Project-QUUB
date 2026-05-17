@@ -56,18 +56,23 @@ export default function CreateJobPage() {
     e.preventDefault();
     if (!user || !db) return;
 
-    if (!formData.title || !formData.budget) {
-      toast({ variant: "destructive", title: "Missing Fields", description: "Title and Budget are required." });
+    if (!formData.title.trim()) {
+      toast({ variant: "destructive", title: "Missing Title", description: "A job title is required." });
+      return;
+    }
+
+    if (!formData.budget.trim()) {
+      toast({ variant: "destructive", title: "Missing Budget", description: "Please specify a budget or rate." });
       return;
     }
 
     setLoading(true);
 
     const jobData = {
-      title: formData.title,
-      description: formData.description,
-      budget: formData.budget,
-      location: formData.location,
+      title: formData.title.trim(),
+      description: formData.description.trim(),
+      budget: formData.budget.trim(),
+      location: formData.location.trim(),
       type: formData.type,
       category: formData.category,
       skills: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
@@ -78,12 +83,8 @@ export default function CreateJobPage() {
       isUrgent: false
     };
 
+    // Non-blocking mutation for immediate UI response
     addDoc(collection(db, 'jobs'), jobData)
-      .then(() => {
-        toast({ title: "Job Posted Success!", description: "Your opportunity is now live and pending review." });
-        setLoading(false);
-        router.push('/jobs');
-      })
       .catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
           path: 'jobs',
@@ -91,8 +92,19 @@ export default function CreateJobPage() {
           requestResourceData: jobData,
         });
         errorEmitter.emit('permission-error', permissionError);
-        setLoading(false);
       });
+
+    // Immediate success flow
+    toast({ 
+      title: "Job Published!", 
+      description: "Success! Your job posting is now active in the hub." 
+    });
+    
+    // Small delay to ensure toast is seen before navigation
+    setTimeout(() => {
+      setLoading(false);
+      router.push('/jobs');
+    }, 500);
   };
 
   if (!user) return null;
@@ -118,7 +130,7 @@ export default function CreateJobPage() {
                   <Input 
                     value={formData.title}
                     onChange={e => setFormData({ ...formData, title: e.target.value })}
-                    className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
+                    className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20 font-bold" 
                     placeholder="e.g. Senior Product Designer"
                   />
                 </div>
@@ -140,7 +152,7 @@ export default function CreateJobPage() {
                 <Textarea 
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
-                  className="min-h-[150px] rounded-2xl bg-muted/30 border-none p-5 focus-visible:ring-primary/20" 
+                  className="min-h-[150px] rounded-2xl bg-muted/30 border-none p-5 focus-visible:ring-primary/20 font-bold" 
                   placeholder="Describe the role, responsibilities and requirements..."
                 />
               </div>
@@ -151,7 +163,7 @@ export default function CreateJobPage() {
                   <div className="relative">
                     <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
                     <Select onValueChange={v => setFormData({...formData, category: v})} defaultValue={formData.category}>
-                      <SelectTrigger className="h-14 rounded-2xl bg-muted/30 border-none pl-12 focus:ring-primary/20">
+                      <SelectTrigger className="h-14 rounded-2xl bg-muted/30 border-none pl-12 focus:ring-primary/20 font-bold">
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent className="rounded-2xl">
@@ -166,7 +178,7 @@ export default function CreateJobPage() {
                 <div className="space-y-2">
                   <Label className="text-xs font-black uppercase tracking-widest ml-1">Work Type</Label>
                   <Select onValueChange={v => setFormData({...formData, type: v})} defaultValue={formData.type}>
-                    <SelectTrigger className="h-14 rounded-2xl bg-muted/30 border-none focus:ring-primary/20">
+                    <SelectTrigger className="h-14 rounded-2xl bg-muted/30 border-none focus:ring-primary/20 font-bold">
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl">
@@ -186,7 +198,7 @@ export default function CreateJobPage() {
                     <Input 
                       value={formData.budget}
                       onChange={e => setFormData({ ...formData, budget: e.target.value })}
-                      className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
+                      className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20 font-bold" 
                       placeholder="e.g. $50/hr or $2,000"
                     />
                   </div>
@@ -199,8 +211,8 @@ export default function CreateJobPage() {
                     <Input 
                       value={formData.location}
                       onChange={e => setFormData({ ...formData, location: e.target.value })}
-                      className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
-                      placeholder="e.g. Remote or City, Country"
+                      className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20 font-bold" 
+                      placeholder="e.g. Remote or City, District"
                     />
                   </div>
                 </div>
@@ -213,7 +225,7 @@ export default function CreateJobPage() {
                   <Input 
                     value={formData.skills}
                     onChange={e => setFormData({ ...formData, skills: e.target.value })}
-                    className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
+                    className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20 font-bold" 
                     placeholder="React, Design, Node.js"
                   />
                 </div>

@@ -95,20 +95,17 @@ export default function ProfilePage() {
     setSaveLoading(true);
 
     const updatedData = {
-      name: editForm.name,
-      bio: editForm.bio,
-      location: editForm.location,
-      phone: editForm.phone,
+      name: editForm.name.trim(),
+      bio: editForm.bio.trim(),
+      location: editForm.location.trim(),
+      phone: editForm.phone.trim(),
       userType: editForm.userType,
       skills: (editForm.skills || '').split(',').map(s => s.trim()).filter(Boolean),
       email: user.email || profileData?.email || ''
     };
 
+    // Non-blocking mutation for immediate UI update
     setDoc(userRef, updatedData, { merge: true })
-      .then(() => {
-        toast({ title: "Profile Updated", description: "Your changes have been saved successfully." });
-        setIsEditing(false);
-      })
       .catch(async (error) => {
         const permissionError = new FirestorePermissionError({
           path: userRef.path,
@@ -116,10 +113,17 @@ export default function ProfilePage() {
           requestResourceData: updatedData,
         });
         errorEmitter.emit('permission-error', permissionError);
-      })
-      .finally(() => {
-        setSaveLoading(false);
       });
+
+    // Immediate success flow
+    toast({ 
+      title: "Profile Updated", 
+      description: "Your changes have been saved successfully." 
+    });
+    
+    // Close modal instantly
+    setIsEditing(false);
+    setSaveLoading(false);
   };
   
   const stats = [
@@ -136,7 +140,10 @@ export default function ProfilePage() {
   if (!mounted || authLoading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8F9FE]">
-        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
+          <p className="font-bold text-muted-foreground uppercase tracking-widest text-[10px]">Synchronizing Workspace</p>
+        </div>
       </div>
     );
   }

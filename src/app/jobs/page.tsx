@@ -60,13 +60,13 @@ export default function JobsPage() {
 
   const jobsQuery = useMemoFirebase(() => {
     if (!db) return null;
-    return query(collection(db, 'jobs'), orderBy('createdAt', 'desc'), limit(50));
+    // Query the latest jobs
+    return query(collection(db, 'jobs'), orderBy('createdAt', 'desc'), limit(100));
   }, [db]);
 
   const workersQuery = useMemoFirebase(() => {
     if (!db) return null;
-    // Query users ordered by creation date to show new users automatically at top
-    return query(collection(db, 'users'), orderBy('createdAt', 'desc'), limit(50));
+    return query(collection(db, 'users'), orderBy('createdAt', 'desc'), limit(100));
   }, [db]);
 
   const { data: rawJobs, loading: jobsLoading } = useCollection(jobsQuery);
@@ -82,13 +82,17 @@ export default function JobsPage() {
   const filteredJobs = useMemo(() => {
     if (!rawJobs) return [];
     return rawJobs.filter(job => {
-      const matchesSearch = job.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      const matchesSearch = !searchQuery || 
+                           job.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            job.description?.toLowerCase().includes(searchQuery.toLowerCase());
       
       const matchesCategory = selectedCategory === 'All' || 
                              job.category?.toLowerCase() === selectedCategory.toLowerCase();
 
-      const matchesLocation = currentLocation === 'Kerala' || job.location === currentLocation;
+      // Inclusive location: show if matches district, or if "Kerala" (show all), or if job is "Remote"
+      const matchesLocation = currentLocation === 'Kerala' || 
+                             job.location === currentLocation || 
+                             job.location?.toLowerCase() === 'remote';
       
       return matchesSearch && matchesCategory && matchesLocation;
     });
@@ -97,8 +101,8 @@ export default function JobsPage() {
   const filteredWorkers = useMemo(() => {
     if (!rawWorkers) return [];
     return rawWorkers.filter(worker => {
-      // Include all user profiles automatically as requested
-      const matchesSearch = worker.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      const matchesSearch = !searchQuery ||
+                           worker.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            worker.skills?.some((s: string) => s.toLowerCase().includes(searchQuery.toLowerCase())) ||
                            worker.bio?.toLowerCase().includes(searchQuery.toLowerCase());
       
@@ -125,19 +129,17 @@ export default function JobsPage() {
       toast({ title: "Auth Required", description: "Please sign in to apply." });
       return;
     }
-    try {
-      await addDoc(collection(db, 'applications'), {
-        jobId: job.id,
-        jobTitle: job.title,
-        userId: user.uid,
-        userName: user.displayName,
-        appliedAt: serverTimestamp(),
-        status: 'pending'
-      });
-      toast({ title: "Application Sent!", description: `You've applied for ${job.title}.` });
-    } catch (e) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to submit application." });
-    }
+    const appData = {
+      jobId: job.id,
+      jobTitle: job.title,
+      userId: user.uid,
+      userName: user.displayName,
+      appliedAt: serverTimestamp(),
+      status: 'pending'
+    };
+    
+    addDoc(collection(db, 'applications'), appData);
+    toast({ title: "Application Sent!", description: `You've applied for ${job.title}.` });
   };
 
   if (!mounted) return null;

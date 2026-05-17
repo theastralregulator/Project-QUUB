@@ -142,25 +142,28 @@ export default function DashboardPage() {
     );
   };
 
+  // Improved nearby jobs query: query latest and filter client-side for "Remote" inclusion
   const nearbyJobsQuery = useMemoFirebase(() => {
     if (!db) return null;
-    if (location === 'Kerala' || location === 'Remote') {
-        return query(collection(db, 'jobs'), orderBy('createdAt', 'desc'), limit(4));
-    }
-    return query(
-      collection(db, 'jobs'), 
-      where('location', '==', location), 
-      limit(4)
-    );
-  }, [db, location]);
+    return query(collection(db, 'jobs'), orderBy('createdAt', 'desc'), limit(10));
+  }, [db]);
 
   const trendingJobsQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, 'jobs'), orderBy('createdAt', 'desc'), limit(5));
   }, [db]);
 
-  const { data: nearbyJobs, loading: nearbyLoading } = useCollection(nearbyJobsQuery);
+  const { data: rawNearbyJobs, loading: nearbyLoading } = useCollection(nearbyJobsQuery);
   const { data: trendingJobs } = useCollection(trendingJobsQuery);
+
+  const nearbyJobs = useMemo(() => {
+    if (!rawNearbyJobs) return [];
+    return rawNearbyJobs.filter(job => 
+      location === 'Kerala' || 
+      job.location === location || 
+      job.location?.toLowerCase() === 'remote'
+    ).slice(0, 4);
+  }, [rawNearbyJobs, location]);
 
   useEffect(() => {
     if (mounted && user && !recommendations && !isRecommending) {
@@ -220,15 +223,15 @@ export default function DashboardPage() {
 
   const handleQuickApply = (job: any) => {
     if (!db || !user) return;
-    const appRef = doc(collection(db, 'applications'));
-    setDoc(appRef, {
+    const appData = {
       jobId: job.id,
       jobTitle: job.title,
       userId: user.uid,
       userName: user.displayName,
       status: 'pending',
       appliedAt: serverTimestamp()
-    });
+    };
+    addDoc(collection(db, 'applications'), appData);
     toast({ title: "Application Sent!", description: `Success! You applied for ${job.title}.` });
   };
 

@@ -65,7 +65,8 @@ export default function JobsPage() {
 
   const workersQuery = useMemoFirebase(() => {
     if (!db) return null;
-    return query(collection(db, 'users'), where('userType', 'in', ['worker', 'both']), limit(30));
+    // Fetch all users and filter by quality (skills > 0) client-side for flexibility
+    return query(collection(db, 'users'), limit(50));
   }, [db]);
 
   const { data: rawJobs, loading: jobsLoading } = useCollection(jobsQuery);
@@ -96,9 +97,14 @@ export default function JobsPage() {
   const filteredWorkers = useMemo(() => {
     if (!rawWorkers) return [];
     return rawWorkers.filter(worker => {
+      // QUALITY FILTER: Only show profiles that have at least one skill
+      const hasSkills = worker.skills && Array.isArray(worker.skills) && worker.skills.length > 0;
+      if (!hasSkills) return false;
+
       const matchesSearch = worker.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            worker.skills?.some((s: string) => s.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesLocation = currentLocation === 'Kerala' || worker.location === currentLocation;
+      
       return matchesSearch && matchesLocation;
     });
   }, [rawWorkers, searchQuery, currentLocation]);
@@ -270,7 +276,7 @@ export default function JobsPage() {
               <h3 className="text-2xl font-black tracking-tight">Elite Workers <span className="text-muted-foreground font-medium ml-2 text-lg">({filteredWorkers.length})</span></h3>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {workersLoading ? [1, 2, 3].map(i => <div key={i} className="h-72 bg-white rounded-[2.5rem] animate-pulse" />) : filteredWorkers.map((worker) => (
+              {workersLoading ? [1, 2, 3].map(i => <div key={i} className="h-72 bg-white rounded-[2.5rem] animate-pulse" />) : filteredWorkers.length ? filteredWorkers.map((worker) => (
                 <Card key={worker.id} className="border-none shadow-sm rounded-[3rem] bg-white group hover:shadow-2xl transition-all overflow-hidden relative border border-transparent hover:border-primary/10">
                   <CardContent className="p-8 space-y-8">
                     <div className="flex items-start justify-between">
@@ -295,7 +301,7 @@ export default function JobsPage() {
                       <p className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">{worker.role || 'Elite Professional'}</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {(worker.skills || ['React', 'UI Design']).slice(0, 3).map((skill: string) => (
+                      {(worker.skills || []).slice(0, 3).map((skill: string) => (
                         <Badge key={skill} variant="secondary" className="bg-muted/30 text-[9px] font-black rounded-lg px-3 py-1.5 uppercase tracking-wider border-none">{skill}</Badge>
                       ))}
                     </div>
@@ -309,7 +315,11 @@ export default function JobsPage() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              )) : (
+                <div className="text-center p-20 bg-white rounded-[2.5rem] border-dashed border-2">
+                  <p className="text-muted-foreground font-bold">No active workers found matching your criteria.</p>
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>

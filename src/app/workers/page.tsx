@@ -1,8 +1,9 @@
 
 "use client"
 
+import { useMemo } from 'react';
 import { useFirestore, useCollection } from '@/firebase';
-import { collection, query, where, limit } from 'firebase/firestore';
+import { collection, query, limit } from 'firebase/firestore';
 import { useMemoFirebase } from '@/firebase/use-memo-firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,10 +17,19 @@ export default function WorkersPage() {
 
   const workersQuery = useMemoFirebase(() => {
     if (!db) return null;
-    return query(collection(db, 'users'), where('userType', 'in', ['worker', 'both']), limit(18));
+    // Fetch all users and filter quality profiles client-side
+    return query(collection(db, 'users'), limit(40));
   }, [db]);
 
-  const { data: workers, loading } = useCollection(workersQuery);
+  const { data: rawWorkers, loading } = useCollection(workersQuery);
+
+  const filteredWorkers = useMemo(() => {
+    if (!rawWorkers) return [];
+    return rawWorkers.filter(worker => {
+      // Quality check: Only show workers who have actually added skills
+      return worker.skills && Array.isArray(worker.skills) && worker.skills.length > 0;
+    });
+  }, [rawWorkers]);
 
   return (
     <div className="min-h-screen bg-muted/20 pb-20">
@@ -51,7 +61,7 @@ export default function WorkersPage() {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {workers?.map((worker) => (
+            {filteredWorkers.map((worker) => (
               <Card key={worker.id} className="group hover:shadow-xl transition-all border-none shadow-sm rounded-3xl overflow-hidden bg-white">
                 <CardContent className="p-6 space-y-6">
                   <div className="flex items-start justify-between">
@@ -93,7 +103,7 @@ export default function WorkersPage() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {worker.skills?.map((skill: string) => (
+                    {(worker.skills || []).map((skill: string) => (
                       <Badge key={skill} variant="secondary" className="bg-muted/50 font-normal text-xs">{skill}</Badge>
                     ))}
                   </div>
@@ -108,9 +118,13 @@ export default function WorkersPage() {
           </div>
         )}
         
-        {!loading && workers?.length === 0 && (
+        {!loading && filteredWorkers.length === 0 && (
           <Card className="text-center p-12 border-dashed">
-            <p className="text-muted-foreground">No elite workers found yet. Be the first!</p>
+            <div className="max-w-xs mx-auto space-y-4">
+              <Users className="w-12 h-12 text-muted-foreground/30 mx-auto" />
+              <p className="text-muted-foreground font-bold text-lg">No professional profiles found.</p>
+              <p className="text-sm text-muted-foreground">Profiles without listed skills are automatically hidden to maintain platform quality.</p>
+            </div>
           </Card>
         )}
       </div>

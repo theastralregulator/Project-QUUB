@@ -45,7 +45,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { useMemoFirebase } from '@/firebase/use-memo-firebase';
 import { useToast } from '@/hooks/use-toast';
 
@@ -90,7 +90,7 @@ export default function ProfilePage() {
     }
   }, [profileData]);
 
-  const handleSaveProfile = async () => {
+  const handleSaveProfile = () => {
     if (!user || !db || !userRef) return;
     setSaveLoading(true);
 
@@ -100,10 +100,11 @@ export default function ProfilePage() {
       location: editForm.location,
       phone: editForm.phone,
       userType: editForm.userType,
-      skills: editForm.skills.split(',').map(s => s.trim()).filter(Boolean)
+      skills: (editForm.skills || '').split(',').map(s => s.trim()).filter(Boolean),
+      email: user.email || profileData?.email || ''
     };
 
-    updateDoc(userRef, updatedData)
+    setDoc(userRef, updatedData, { merge: true })
       .then(() => {
         toast({ title: "Profile Updated", description: "Your changes have been saved successfully." });
         setIsEditing(false);
@@ -111,12 +112,14 @@ export default function ProfilePage() {
       .catch(async (error) => {
         const permissionError = new FirestorePermissionError({
           path: userRef.path,
-          operation: 'update',
+          operation: 'write',
           requestResourceData: updatedData,
         });
         errorEmitter.emit('permission-error', permissionError);
       })
-      .finally(() => setSaveLoading(false));
+      .finally(() => {
+        setSaveLoading(false);
+      });
   };
   
   const stats = [
@@ -127,8 +130,8 @@ export default function ProfilePage() {
     { label: "Active Projects", value: "0", icon: Briefcase, color: "text-violet-600 bg-violet-50" },
   ];
 
-  const projects = []; // Assuming empty for now as it's not in schema yet
-  const reviews = []; // Assuming empty for now
+  const projects = []; 
+  const reviews = []; 
 
   if (!mounted || authLoading || profileLoading) {
     return (
@@ -216,7 +219,7 @@ export default function ProfilePage() {
                     <CheckCircle2 className="w-3.5 h-3.5 text-[#6366f1] fill-[#6366f1]/10" />
                   </Badge>
                 )) : (
-                  <p className="text-xs text-muted-foreground font-medium">Add skills to show up in search results</p>
+                  <p className="text-xs text-muted-foreground font-medium italic">No skills added yet</p>
                 )}
               </div>
             </div>

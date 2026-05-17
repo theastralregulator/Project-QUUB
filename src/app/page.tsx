@@ -229,8 +229,10 @@ export default function LandingPage() {
             <div className="lg:col-span-5 space-y-10">
               <Link href="/" className="flex items-center gap-4 group">
                 <div className="w-12 h-12 group-hover:scale-105 transition-transform shrink-0">
-                  <svg viewBox="0 0 100 100" className="w-full h-full text-[#6366f1] drop-shadow-xl" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path fillRule="evenodd" clipRule="evenodd" d="M20 0C8.954 0 0 8.954 0 20V80C0 91.046 8.954 100 20 100H60L85 115V100H80C91.046 100 100 91.046 100 80V20C100 8.954 91.046 0 80 0H20ZM25 25V75H55L75 55V25H25Z" />
+                  <svg viewBox="0 0 32 32" className="w-full h-full text-[#6366f1] drop-shadow-xl" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="32" height="32" rx="8" fill="currentColor"/>
+                    <circle cx="16" cy="14" r="6" stroke="white" strokeWidth="3"/>
+                    <path d="M20.5 19.5L24 23" stroke="white" strokeWidth="3" strokeLinecap="round"/>
                   </svg>
                 </div>
                 <span className="text-4xl font-headline font-black text-[#111827] tracking-tighter">Quub</span>

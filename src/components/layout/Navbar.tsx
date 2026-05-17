@@ -95,8 +95,10 @@ export function Navbar() {
       <div className="container mx-auto px-4 flex h-20 items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
           <div className="w-10 h-10 group-hover:scale-105 transition-transform shrink-0">
-            <svg viewBox="0 0 100 100" className="w-full h-full text-[#6366f1] drop-shadow-md" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path fillRule="evenodd" clipRule="evenodd" d="M20 0C8.954 0 0 8.954 0 20V80C0 91.046 8.954 100 20 100H60L85 115V100H80C91.046 100 100 91.046 100 80V20C100 8.954 91.046 0 80 0H20ZM25 25V75H55L75 55V25H25Z" />
+            <svg viewBox="0 0 32 32" className="w-full h-full text-[#6366f1] drop-shadow-md" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="32" height="32" rx="8" fill="currentColor"/>
+              <circle cx="16" cy="14" r="6" stroke="white" strokeWidth="3"/>
+              <path d="M20.5 19.5L24 23" stroke="white" strokeWidth="3" strokeLinecap="round"/>
             </svg>
           </div>
           <span className="text-2xl font-headline font-black text-[#111827] tracking-tight">Quub</span>

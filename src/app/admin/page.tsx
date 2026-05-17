@@ -36,7 +36,8 @@ import {
   Search,
   Check,
   X,
-  FileText
+  FileText,
+  Clock
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -70,11 +71,19 @@ export default function AdminPage() {
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/auth/signin');
+      return;
     }
-    if (profile) {
+    
+    // Explicit elevation for requested user
+    if (user?.email === 'sabinsaji3900@gmail.com') {
+      setIsAdmin(true);
+      if (profile && profile.role !== 'admin' && db) {
+        updateDoc(doc(db, 'users', user.uid), { role: 'admin' });
+      }
+    } else if (profile) {
       setIsAdmin(profile.role === 'admin');
     }
-  }, [user, authLoading, profile, router]);
+  }, [user, authLoading, profile, router, db]);
 
   // Data Queries
   const usersQuery = useMemoFirebase(() => db ? query(collection(db, 'users'), orderBy('createdAt', 'desc'), limit(50)) : null, [db]);

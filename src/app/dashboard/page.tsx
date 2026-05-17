@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from 'react';
@@ -36,7 +37,7 @@ import {
   ShieldAlert,
   Crown
 } from 'lucide-react';
-import { collection, query, limit, orderBy, where, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, limit, orderBy, where, doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useMemoFirebase } from '@/firebase/use-memo-firebase';
 import Link from 'next/link';
@@ -92,6 +93,14 @@ export default function DashboardPage() {
     const savedLoc = typeof window !== 'undefined' ? localStorage.getItem('quub_location') : null;
     if (savedLoc) setLocation(savedLoc);
   }, []);
+
+  // Bootstrap Admin for specific user
+  useEffect(() => {
+    if (user?.email === 'sabinsaji3900@gmail.com' && profile && profile.role !== 'admin' && db) {
+      updateDoc(doc(db, 'users', user.uid), { role: 'admin' });
+      toast({ title: "Admin Access Granted", description: "Your account has been promoted to Administrator." });
+    }
+  }, [user, profile, db, toast]);
 
   const updateLocation = (newLoc: string) => {
     setLocation(newLoc);
@@ -317,7 +326,7 @@ export default function DashboardPage() {
                     <DropdownMenuItem className="rounded-2xl font-black py-4 px-5 gap-3 cursor-pointer">
                       <Settings className="w-5 h-5 text-muted-foreground" /> Settings
                     </DropdownMenuItem>
-                    {profile?.role === 'admin' && (
+                    {(profile?.role === 'admin' || user.email === 'sabinsaji3900@gmail.com') && (
                       <Link href="/admin">
                         <DropdownMenuItem className="rounded-2xl font-black py-4 px-5 gap-3 cursor-pointer text-orange-600 focus:bg-orange-50 focus:text-orange-700">
                           <ShieldAlert className="w-5 h-5" /> Admin Panel

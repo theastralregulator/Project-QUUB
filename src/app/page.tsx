@@ -230,7 +230,7 @@ export default function LandingPage() {
               <Link href="/" className="flex items-center gap-4 group">
                 <div className="w-12 h-12 group-hover:scale-105 transition-transform shrink-0">
                   <svg viewBox="0 0 100 100" className="w-full h-full text-[#6366f1] drop-shadow-xl" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path fillRule="evenodd" clipRule="evenodd" d="M20 0C8.9543 0 0 8.9543 0 20V70C0 81.0457 8.9543 90 20 90H58L65 100H82L75 90H80C91.0457 90 100 81.0457 100 70V20C100 8.9543 91.0457 0 80 0H20ZM25 25H75V65H25V25Z" />
+                    <path fillRule="evenodd" clipRule="evenodd" d="M25 0C11.1929 0 0 11.1929 0 25V75C0 88.8071 11.1929 100 25 100H65L80 115V100H85C98.8071 100 110 88.8071 110 75V25C110 11.1929 98.8071 0 85 0H25ZM30 30H80V70H30V30Z" />
                   </svg>
                 </div>
                 <span className="text-4xl font-headline font-black text-[#111827] tracking-tighter">Quub</span>

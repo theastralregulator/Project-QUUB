@@ -1,11 +1,15 @@
+
 "use client"
 
 import { useState, useEffect } from 'react';
-import { useUser, useDoc, useFirestore } from '@/firebase';
+import { useUser, useDoc, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   Plus, 
   CheckCircle2, 
@@ -14,23 +18,53 @@ import {
   Briefcase, 
   Wallet, 
   Star,
-  PieChart,
-  Atom,
   ChevronRight,
   Loader2,
   Crown,
-  Sparkles
+  Sparkles,
+  MapPin,
+  Phone,
+  User as UserIcon,
+  X
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { doc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { useMemoFirebase } from '@/firebase/use-memo-firebase';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useUser();
   const db = useFirestore();
+  const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+
+  const [editForm, setEditForm] = useState({
+    name: '',
+    bio: '',
+    location: '',
+    phone: '',
+    userType: 'both',
+    skills: ''
+  });
 
   const userRef = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -42,39 +76,61 @@ export default function ProfilePage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (profileData) {
+      setEditForm({
+        name: profileData.name || '',
+        bio: profileData.bio || '',
+        location: profileData.location || '',
+        phone: profileData.phone || '',
+        userType: profileData.userType || 'both',
+        skills: (profileData.skills || []).join(', ')
+      });
+    }
+  }, [profileData]);
+
+  const handleSaveProfile = async () => {
+    if (!user || !db || !userRef) return;
+    setSaveLoading(true);
+
+    const updatedData = {
+      name: editForm.name,
+      bio: editForm.bio,
+      location: editForm.location,
+      phone: editForm.phone,
+      userType: editForm.userType,
+      skills: editForm.skills.split(',').map(s => s.trim()).filter(Boolean)
+    };
+
+    updateDoc(userRef, updatedData)
+      .then(() => {
+        toast({ title: "Profile Updated", description: "Your changes have been saved successfully." });
+        setIsEditing(false);
+      })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: userRef.path,
+          operation: 'update',
+          requestResourceData: updatedData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      })
+      .finally(() => setSaveLoading(false));
+  };
   
   const stats = [
-    { label: "Member Since", value: profileData?.createdAt ? new Date(profileData.createdAt.seconds * 1000).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "June 2023", icon: Calendar, color: "text-purple-600 bg-purple-50" },
-    { label: "Job Success Rate", value: "98%", icon: TrendingUp, color: "text-green-600 bg-green-50" },
-    { label: "Total Earned", value: "₹1,25,000+", icon: Wallet, color: "text-indigo-600 bg-indigo-50" },
-    { label: "Jobs Completed", value: "115", icon: CheckCircle2, color: "text-emerald-600 bg-emerald-50" },
-    { label: "Active Projects", value: "2", icon: Briefcase, color: "text-violet-600 bg-violet-50" },
+    { label: "Member Since", value: profileData?.createdAt?.seconds ? new Date(profileData.createdAt.seconds * 1000).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "Recently", icon: Calendar, color: "text-purple-600 bg-purple-50" },
+    { label: "Job Success Rate", value: profileData?.rating ? "98%" : "N/A", icon: TrendingUp, color: "text-green-600 bg-green-50" },
+    { label: "Total Earned", value: "₹0", icon: Wallet, color: "text-indigo-600 bg-indigo-50" },
+    { label: "Jobs Completed", value: profileData?.reviewsCount || "0", icon: CheckCircle2, color: "text-emerald-600 bg-emerald-50" },
+    { label: "Active Projects", value: "0", icon: Briefcase, color: "text-violet-600 bg-violet-50" },
   ];
 
-  const projects = [
-    {
-      title: "Website Redesign",
-      desc: "Comprehensive platform and brand redesign for a high-growth tech startup.",
-      image: "https://picsum.photos/seed/project1/600/400",
-      color: "bg-indigo-600"
-    },
-    {
-      title: "Mobile App Development",
-      desc: "Cross-platform mobile application for real-time logistics tracking.",
-      image: "https://picsum.photos/seed/project2/600/400",
-      color: "bg-emerald-500"
-    }
-  ];
+  const projects = []; // Assuming empty for now as it's not in schema yet
+  const reviews = []; // Assuming empty for now
 
-  const reviews = [
-    { name: "Aakash R.", time: "5 days ago", rating: 5, text: "Incredible attention to detail and deep understanding of modern UI patterns." },
-    { name: "Meera K.", time: "2 weeks ago", rating: 5, text: "Delivered the project ahead of schedule with exceptional quality." },
-    { name: "Rahul S.", time: "1 month ago", rating: 5, text: "A true professional who knows how to scale tech stacks effectively." }
-  ];
-
-  const skills = profileData?.skills?.length ? profileData.skills : ["React", "Node.js", "Firebase", "Next.js", "UI/UX Design", "System Architecture"];
-
-  if (!mounted || authLoading) {
+  if (!mounted || authLoading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8F9FE]">
         <Loader2 className="w-10 h-10 animate-spin text-primary" />
@@ -90,6 +146,8 @@ export default function ProfilePage() {
     }
   };
 
+  const skills = profileData?.skills || [];
+
   return (
     <div className="min-h-screen bg-[#F8F9FE] pb-24 lg:pb-12 pt-8">
       <div className="container mx-auto px-4 max-w-7xl">
@@ -99,7 +157,11 @@ export default function ProfilePage() {
             <p className="text-muted-foreground font-medium">Manage your professional identity and workspace.</p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="rounded-xl h-12 px-6 font-black text-sm border-muted-foreground/20 bg-white">
+            <Button 
+              variant="outline" 
+              className="rounded-xl h-12 px-6 font-black text-sm border-muted-foreground/20 bg-white"
+              onClick={() => setIsEditing(true)}
+            >
               Edit Profile
             </Button>
             <Link href="/upgrades">
@@ -112,26 +174,19 @@ export default function ProfilePage() {
 
         <Card className="border-none shadow-none rounded-[3rem] bg-gradient-to-br from-[#E6E9FF] to-[#F0F2FF] mb-12 overflow-hidden relative">
           <CardContent className="p-10 md:p-16 flex flex-col items-center text-center relative z-10">
-            <div className="absolute top-10 left-1/4 -translate-x-1/2 opacity-20 hidden lg:block">
-              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg transform -rotate-12"><Briefcase className="w-8 h-8 text-indigo-600" /></div>
-            </div>
-            <div className="absolute top-20 right-1/4 translate-x-1/2 opacity-20 hidden lg:block">
-              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg transform rotate-12"><Star className="w-8 h-8 text-yellow-500 fill-yellow-500" /></div>
-            </div>
-
             <div className="relative mb-6">
               <Avatar className="w-32 h-32 rounded-full border-8 border-white shadow-2xl">
-                <AvatarImage src={profileData?.avatarUrl || user?.photoURL || `https://picsum.photos/seed/${user?.uid || 'aman'}/400`} />
-                <AvatarFallback className="text-3xl font-black">{profileData?.name?.[0] || user?.displayName?.[0] || 'A'}</AvatarFallback>
+                <AvatarImage src={profileData?.avatarUrl || user?.photoURL || `https://picsum.photos/seed/${user?.uid}/400`} />
+                <AvatarFallback className="text-3xl font-black">{profileData?.name?.[0] || 'U'}</AvatarFallback>
               </Avatar>
               <div className="absolute -bottom-2 right-0 bg-white p-2 rounded-2xl shadow-xl">
-                {getTierIcon(profileData?.accountType)}
+                {getTierIcon(profileData?.accountType || 'standard')}
               </div>
             </div>
             
             <div className="space-y-3 mb-8">
-              <h2 className="text-4xl font-black tracking-tight text-[#111827]">{profileData?.name || user?.displayName || "Member"}</h2>
-              <p className="text-lg font-bold text-[#6B7280]">{profileData?.bio || "Elite Professional in Kerala"}</p>
+              <h2 className="text-4xl font-black tracking-tight text-[#111827]">{profileData?.name || "New Member"}</h2>
+              <p className="text-lg font-bold text-[#6B7280]">{profileData?.bio || "No bio added yet"}</p>
               <div className="flex items-center justify-center gap-3">
                 <Badge variant="secondary" className={cn(
                   "font-black px-5 py-1.5 rounded-full text-[10px] uppercase tracking-widest border-none",
@@ -141,6 +196,11 @@ export default function ProfilePage() {
                 )}>
                   {profileData?.accountType || 'Standard'} Member
                 </Badge>
+                {profileData?.location && (
+                  <Badge variant="outline" className="rounded-full border-muted-foreground/20 px-4 py-1.5 flex items-center gap-1.5 font-bold text-[10px] uppercase">
+                    <MapPin className="w-3 h-3" /> {profileData.location}
+                  </Badge>
+                )}
               </div>
             </div>
 
@@ -150,12 +210,14 @@ export default function ProfilePage() {
                 <CheckCircle2 className="w-4 h-4 text-[#6366f1]" />
               </div>
               <div className="flex flex-wrap justify-center gap-2">
-                {skills.map((skill: string, i: number) => (
+                {skills.length > 0 ? skills.map((skill: string, i: number) => (
                   <Badge key={i} variant="secondary" className="bg-white border-none text-[#111827] font-black px-5 py-2.5 rounded-xl text-[11px] gap-2 shadow-sm">
                     {skill}
                     <CheckCircle2 className="w-3.5 h-3.5 text-[#6366f1] fill-[#6366f1]/10" />
                   </Badge>
-                ))}
+                )) : (
+                  <p className="text-xs text-muted-foreground font-medium">Add skills to show up in search results</p>
+                )}
               </div>
             </div>
           </CardContent>
@@ -182,7 +244,7 @@ export default function ProfilePage() {
           <div className="space-y-6">
             <h3 className="text-2xl font-black tracking-tight text-[#111827]">Portfolio Highlights</h3>
             <div className="space-y-4">
-              {projects.map((project, i) => (
+              {projects.length > 0 ? projects.map((project: any, i) => (
                 <Card key={i} className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden group">
                   <div className={cn("aspect-video relative overflow-hidden", project.color)}>
                     <Image src={project.image} alt={project.title} fill className="object-cover opacity-95 group-hover:scale-110 transition-transform duration-700" data-ai-hint="project showcase" />
@@ -190,17 +252,21 @@ export default function ProfilePage() {
                   <CardContent className="p-8 space-y-4">
                     <h4 className="text-2xl font-black text-[#111827]">{project.title}</h4>
                     <p className="text-sm text-[#6B7280] font-medium leading-relaxed">{project.desc}</p>
-                    <Link href="#" className="inline-flex items-center gap-2 text-[#6366f1] text-sm font-black group/link">View Link <ChevronRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" /></Link>
                   </CardContent>
                 </Card>
-              ))}
+              )) : (
+                <div className="p-12 text-center bg-white rounded-[2.5rem] border-dashed border-2 flex flex-col gap-4">
+                   <Briefcase className="w-8 h-8 mx-auto text-muted-foreground/30" />
+                   <p className="text-xs font-bold text-muted-foreground uppercase">No projects added yet</p>
+                </div>
+              )}
             </div>
           </div>
 
           <div className="space-y-6">
             <h3 className="text-2xl font-black tracking-tight text-[#111827]">Recent Reviews</h3>
             <div className="space-y-4">
-              {reviews.map((review, i) => (
+              {reviews.length > 0 ? reviews.map((review: any, i) => (
                 <Card key={i} className="border-none shadow-sm rounded-[2rem] bg-white">
                   <CardContent className="p-8 space-y-5">
                     <div className="flex items-center justify-between">
@@ -219,11 +285,112 @@ export default function ProfilePage() {
                     <p className="text-sm text-[#6B7280] font-medium leading-relaxed">"{review.text}"</p>
                   </CardContent>
                 </Card>
-              ))}
+              )) : (
+                <div className="p-12 text-center bg-white rounded-[2.5rem] border-dashed border-2 flex flex-col gap-4">
+                   <Star className="w-8 h-8 mx-auto text-muted-foreground/30" />
+                   <p className="text-xs font-bold text-muted-foreground uppercase">No reviews yet</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent className="rounded-[2.5rem] max-w-2xl p-0 overflow-hidden border-none shadow-2xl">
+          <DialogHeader className="p-10 pb-0 space-y-4">
+            <DialogTitle className="text-4xl font-black tracking-tight">Edit Profile</DialogTitle>
+            <DialogDescription className="text-base font-medium">Update your professional information and settings.</DialogDescription>
+          </DialogHeader>
+          <div className="p-10 pt-8 space-y-6 max-h-[70vh] overflow-y-auto">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Full Name</Label>
+                <div className="relative">
+                  <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input 
+                    value={editForm.name}
+                    onChange={e => setEditForm({...editForm, name: e.target.value})}
+                    className="h-14 rounded-2xl bg-muted/30 border-none px-12 font-bold"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Phone Number</Label>
+                <div className="relative">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input 
+                    value={editForm.phone}
+                    onChange={e => setEditForm({...editForm, phone: e.target.value})}
+                    className="h-14 rounded-2xl bg-muted/30 border-none px-12 font-bold"
+                    placeholder="+91 0000 000000"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Professional Bio</Label>
+              <Textarea 
+                value={editForm.bio}
+                onChange={e => setEditForm({...editForm, bio: e.target.value})}
+                className="min-h-[120px] rounded-2xl bg-muted/30 border-none p-5 font-bold"
+                placeholder="Tell the world about your expertise..."
+              />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Location</Label>
+                <div className="relative">
+                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input 
+                    value={editForm.location}
+                    onChange={e => setEditForm({...editForm, location: e.target.value})}
+                    className="h-14 rounded-2xl bg-muted/30 border-none px-12 font-bold"
+                    placeholder="e.g. Kochi, Kerala"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Profile Type</Label>
+                <Select value={editForm.userType} onValueChange={v => setEditForm({...editForm, userType: v})}>
+                  <SelectTrigger className="h-14 rounded-2xl bg-muted/30 border-none font-bold">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl">
+                    <SelectItem value="worker">Worker Only</SelectItem>
+                    <SelectItem value="employer">Employer Only</SelectItem>
+                    <SelectItem value="both">Both</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Skills (Comma separated)</Label>
+              <div className="relative">
+                <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input 
+                  value={editForm.skills}
+                  onChange={e => setEditForm({...editForm, skills: e.target.value})}
+                  className="h-14 rounded-2xl bg-muted/30 border-none px-12 font-bold"
+                  placeholder="React, Design, Node.js"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="p-10 pt-0">
+            <Button 
+              className="w-full h-16 rounded-[1.25rem] font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform"
+              onClick={handleSaveProfile}
+              disabled={saveLoading}
+            >
+              {saveLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

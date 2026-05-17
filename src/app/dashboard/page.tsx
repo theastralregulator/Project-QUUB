@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useUser, useFirestore, useCollection, useAuth, useDoc } from '@/firebase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,7 @@ import {
   ShieldAlert,
   Crown
 } from 'lucide-react';
-import { collection, query, limit, orderBy, where, doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, limit, orderBy, where, doc, setDoc, updateDoc, serverTimestamp, addDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useMemoFirebase } from '@/firebase/use-memo-firebase';
 import Link from 'next/link';

@@ -230,7 +230,7 @@ export default function AdminPage() {
                          <div key={u.id} className="flex items-center justify-between p-4 rounded-2xl hover:bg-muted/30 transition-colors border border-transparent hover:border-muted/50">
                            <div className="flex items-center gap-4">
                              <Avatar className="w-12 h-12 rounded-xl border-2 border-white shadow-sm">
-                               <AvatarImage src={u.avatarUrl} />
+                               <AvatarImage src={u.avatarUrl || undefined} />
                                <AvatarFallback className="font-black bg-primary/10 text-primary">{u.name?.[0]}</AvatarFallback>
                              </Avatar>
                              <div>
@@ -293,7 +293,7 @@ export default function AdminPage() {
                            <td className="px-8 py-6">
                              <div className="flex items-center gap-4">
                                <Avatar className="w-10 h-10 rounded-xl shadow-sm border border-muted/10">
-                                 <AvatarImage src={u.avatarUrl} />
+                                 <AvatarImage src={u.avatarUrl || undefined} />
                                  <AvatarFallback className="font-bold text-xs">{u.name?.[0]}</AvatarFallback>
                                </Avatar>
                                <div className="flex flex-col">

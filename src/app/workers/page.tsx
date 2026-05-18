@@ -67,7 +67,7 @@ export default function WorkersPage() {
                   <div className="flex items-start justify-between">
                     <div className="relative">
                       <Avatar className="w-20 h-20 rounded-2xl ring-4 ring-primary/5">
-                        <AvatarImage src={worker.avatarUrl} />
+                        <AvatarImage src={worker.avatarUrl || undefined} />
                         <AvatarFallback>{worker.name?.[0]}</AvatarFallback>
                       </Avatar>
                       {worker.rating > 4.5 && (

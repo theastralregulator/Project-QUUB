@@ -1,4 +1,4 @@
-import type {Metadata} from 'next';
+import type {Metadata, Viewport} from 'next';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { MobileNav } from '@/components/layout/MobileNav';
@@ -11,7 +11,12 @@ export const metadata: Metadata = {
   description: 'Connect with elite local talent or find your next big opportunity. Quub is the smartest way to hire and get hired across Kerala.',
   keywords: ['freelance', 'Kerala jobs', 'Kochi tech', 'Trivandrum talent', 'Quub', 'work marketplace'],
   authors: [{ name: 'Quub Team' }],
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({

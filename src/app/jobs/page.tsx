@@ -282,7 +282,7 @@ export default function JobsPage() {
                     <div className="flex items-start justify-between">
                       <div className="relative">
                         <Avatar className="w-24 h-24 rounded-[2rem] ring-8 ring-[#F8F9FE] shadow-lg group-hover:scale-105 transition-transform">
-                          <AvatarImage src={worker.avatarUrl} />
+                          <AvatarImage src={worker.avatarUrl || undefined} />
                           <AvatarFallback className="font-black text-2xl bg-primary/10 text-primary">{worker.name?.[0]}</AvatarFallback>
                         </Avatar>
                         {worker.rating >= 4.8 && (

@@ -52,7 +52,7 @@ export default function CreateJobPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !db) return;
 
@@ -78,33 +78,40 @@ export default function CreateJobPage() {
       skills: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
       postedBy: user.uid,
       employerName: user.displayName || 'Anonymous',
+      employerAvatar: user.photoURL || '',
       status: 'pending',
       createdAt: serverTimestamp(),
       isUrgent: false
     };
 
-    // Non-blocking mutation for immediate UI response
-    addDoc(collection(db, 'jobs'), jobData)
-      .catch(async (serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: 'jobs',
-          operation: 'create',
-          requestResourceData: jobData,
-        });
-        errorEmitter.emit('permission-error', permissionError);
+    try {
+      await addDoc(collection(db, 'jobs'), jobData);
+      
+      toast({ 
+        title: "Job Published!", 
+        description: "Success! Your job posting is now active in the hub." 
       });
-
-    // Immediate success flow
-    toast({ 
-      title: "Job Published!", 
-      description: "Success! Your job posting is now active in the hub." 
-    });
-    
-    // Small delay to ensure toast is seen before navigation
-    setTimeout(() => {
+      
+      setTimeout(() => {
+        setLoading(false);
+        router.push('/jobs');
+      }, 500);
+    } catch (error) {
+      console.error("Error creating job:", error);
+      const permissionError = new FirestorePermissionError({
+        path: 'jobs',
+        operation: 'create',
+        requestResourceData: jobData,
+      });
+      errorEmitter.emit('permission-error', permissionError);
+      
+      toast({ 
+        variant: "destructive",
+        title: "Publish Failed", 
+        description: "Could not publish your job. Please try again or check permissions." 
+      });
       setLoading(false);
-      router.push('/jobs');
-    }, 500);
+    }
   };
 
   if (!user) return null;

@@ -4,6 +4,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export const metadata: Metadata = {
   title: 'Quub | The Future of Work in Kerala',
@@ -27,10 +28,12 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased min-h-screen bg-background selection:bg-primary/20 selection:text-primary">
         <FirebaseClientProvider>
-          <Navbar />
-          <main className="relative">{children}</main>
-          <MobileNav />
-          <Toaster />
+          <ErrorBoundary>
+            <Navbar />
+            <main className="relative">{children}</main>
+            <MobileNav />
+            <Toaster />
+          </ErrorBoundary>
         </FirebaseClientProvider>
       </body>
     </html>

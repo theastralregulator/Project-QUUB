@@ -75,7 +75,9 @@ export function Navbar() {
 
   const updateLocation = (newLoc: string) => {
     setLocation(newLoc);
-    localStorage.setItem('quub_location', newLoc);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('quub_location', newLoc);
+    }
   };
 
   const handleMarkAsRead = async (notificationId: string) => {

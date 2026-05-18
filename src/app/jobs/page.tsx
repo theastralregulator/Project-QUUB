@@ -54,7 +54,7 @@ export default function JobsPage() {
 
   useEffect(() => {
     setMounted(true);
-    const savedLoc = localStorage.getItem('quub_location');
+    const savedLoc = typeof window !== 'undefined' ? localStorage.getItem('quub_location') : null;
     if (savedLoc) setCurrentLocation(savedLoc);
   }, []);
 

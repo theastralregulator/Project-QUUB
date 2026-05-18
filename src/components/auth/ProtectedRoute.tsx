@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/firebase';
 import { Loader2 } from 'lucide-react';
@@ -8,9 +8,11 @@ import { Loader2 } from 'lucide-react';
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useUser();
   const router = useRouter();
+  const hasRedirected = useRef(false);
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && !user && !hasRedirected.current) {
+      hasRedirected.current = true;
       router.push('/auth/signin');
     }
   }, [user, loading, router]);

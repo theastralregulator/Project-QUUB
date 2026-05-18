@@ -4,9 +4,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { useUser, useFirestore, useDoc, useCollection } from '@/firebase';
-import { Bell, MapPin, ChevronDown, Search, Navigation, ShieldAlert, CheckCircle2, Clock } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { useUser, useFirestore, useDoc, useCollection, useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
+import { LogOut } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -22,10 +23,22 @@ import { useMemoFirebase } from '@/firebase/use-memo-firebase';
 
 export function Navbar() {
   const { user } = useUser();
+  const auth = useAuth();
   const db = useFirestore();
   const pathname = usePathname();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [location, setLocation] = useState<string>('Remote');
+
+  const handleSignOut = async () => {
+    if (!auth) return;
+    try {
+      await signOut(auth);
+      router.push('/auth/signin');
+    } catch (e) {
+      console.error("Error signing out", e);
+    }
+  };
 
   const profileRef = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -204,6 +217,10 @@ export function Navbar() {
                           {loc}
                         </DropdownMenuItem>
                       ))}
+                      <div className="h-px bg-muted my-1" />
+                      <DropdownMenuItem onClick={handleSignOut} className="rounded-xl font-bold py-3 px-4 gap-2 text-destructive focus:text-destructive">
+                        <LogOut className="w-4 h-4" /> Log Out
+                      </DropdownMenuItem>
                     </ScrollArea>
                   </DropdownMenuContent>
                 </DropdownMenu>

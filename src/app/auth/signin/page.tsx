@@ -71,7 +71,7 @@ export default function SignInPage() {
         </CardHeader>
 
         <CardContent className="p-10 pt-8 space-y-8">
-          <div className="space-y-5">
+          <form onSubmit={(e) => { e.preventDefault(); handleEmailSignIn(); }} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-xs font-black uppercase tracking-widest ml-1">Email Address</Label>
               <div className="relative">
@@ -83,6 +83,7 @@ export default function SignInPage() {
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
                   placeholder="name@example.com" 
+                  required
                 />
               </div>
             </div>
@@ -101,20 +102,21 @@ export default function SignInPage() {
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                   className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
                   placeholder="••••••••" 
+                  required
                 />
               </div>
             </div>
 
             <div className="pt-6">
               <Button 
-                onClick={handleEmailSignIn}
+                type="submit"
                 disabled={loading}
                 className="w-full h-16 rounded-[1.25rem] font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform"
               >
                 {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Sign In"}
               </Button>
             </div>
-          </div>
+          </form>
 
           <p className="text-center text-sm text-muted-foreground">
             Don't have an account? <Link href="/auth/signup" className="text-primary font-black hover:underline">Sign Up</Link>

@@ -77,15 +77,15 @@ export default function SignUpPage() {
       };
 
       const userRef = doc(db, 'users', user.uid);
-      setDoc(userRef, userProfileData)
-        .catch(async (serverError) => {
-          const permissionError = new FirestorePermissionError({
-            path: userRef.path,
-            operation: 'create',
-            requestResourceData: userProfileData,
-          });
-          errorEmitter.emit('permission-error', permissionError);
+      await setDoc(userRef, userProfileData).catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: userRef.path,
+          operation: 'create',
+          requestResourceData: userProfileData,
         });
+        errorEmitter.emit('permission-error', permissionError);
+        throw serverError; // Rethrow to let the outer catch block handle it
+      });
 
       toast({ title: "Account Created", description: `Welcome to Quub, ${formData.fname}!` });
       router.push('/dashboard');
@@ -121,7 +121,7 @@ export default function SignUpPage() {
             </Alert>
           )}
 
-          <div className="space-y-5">
+          <form onSubmit={(e) => { e.preventDefault(); handleSignUp(); }} className="space-y-5">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="fname" className="text-xs font-black uppercase tracking-widest ml-1">First Name</Label>
@@ -133,6 +133,7 @@ export default function SignUpPage() {
                     onChange={(e) => setFormData({...formData, fname: e.target.value})}
                     className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
                     placeholder="Jane" 
+                    required
                   />
                 </div>
               </div>
@@ -159,6 +160,7 @@ export default function SignUpPage() {
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
                   placeholder="jane@example.com" 
+                  required
                 />
               </div>
             </div>
@@ -174,20 +176,21 @@ export default function SignUpPage() {
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                   className="h-14 rounded-2xl bg-muted/30 border-none px-12 focus-visible:ring-primary/20" 
                   placeholder="••••••••" 
+                  required
                 />
               </div>
             </div>
 
             <div className="pt-6">
               <Button 
-                onClick={handleSignUp}
+                type="submit"
                 disabled={loading}
                 className="w-full h-16 rounded-[1.25rem] font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform"
               >
                 {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Create Account"}
               </Button>
             </div>
-          </div>
+          </form>
 
           <p className="text-center text-sm text-muted-foreground">
             Already have an account? <Link href="/auth/signin" className="text-primary font-black hover:underline">Sign In</Link>

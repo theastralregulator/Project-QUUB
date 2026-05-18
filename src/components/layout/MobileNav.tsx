@@ -4,10 +4,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Briefcase, MessageSquare, User, LayoutDashboard } from 'lucide-react';
+import { useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
 
 export function MobileNav() {
   const pathname = usePathname();
+  const { user } = useUser();
+
+  if (!user) return null;
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },

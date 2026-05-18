@@ -6,7 +6,17 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUser, useFirestore, useDoc, useCollection, useAuth } from '@/firebase';
 import { signOut } from 'firebase/auth';
-import { LogOut } from 'lucide-react';
+import { 
+  LogOut,
+  ShieldAlert,
+  Search,
+  Bell,
+  Clock,
+  CheckCircle2,
+  MapPin,
+  ChevronDown,
+  Navigation
+} from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
